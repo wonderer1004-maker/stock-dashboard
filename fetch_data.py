@@ -286,8 +286,7 @@ def main():
     with open("universe.json", encoding="utf-8") as f:
         universe = json.load(f)
 
-        log("한국 거래대금 상위 종목(코스피 100, 코스닥 제외) 자동 수집 중...")
-    kr_dynamic = safe(lambda: fetch_kr_top_by_value(0, "코스피", 100), default=[], label="kr_top_kospi")
+    log("한국 거래대금 상위 종목(코스피 100, 코스닥 제외) 자동 수집 중...")
     kr_dynamic = safe(lambda: fetch_kr_top_by_value(0, "코스피", 100), default=[], label="kr_top_kospi")
     if len(kr_dynamic) < 20:
         log("WARN: 거래대금 상위 수집 실패/부족 -> universe.json 고정 리스트로 대체")
@@ -308,7 +307,7 @@ def main():
     us_stocks = fetch_universe(us_list)
 
     universe_note = (
-               f"한국: {'코스피 거래대금 상위 100 (코스닥 제외, 네이버금융 실시간 랭킹)' if kr_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'} · "
+        f"한국: {'코스피 거래대금 상위 100 (코스닥 제외, 네이버금융 실시간 랭킹)' if kr_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'} · "
         f"미국: {'거래대금(거래량) 상위 100종목 (야후파이낸스 스크리너)' if us_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'}"
     )
 
