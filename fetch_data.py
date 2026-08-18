@@ -166,11 +166,19 @@ def fetch_stock(ticker, name):
         change_pct = (price - prev_close) / prev_close * 100 if prev_close else 0.0
 
         per = None
+        pbr = None
+        roe = None
+        profit_margin = None
+        debt_to_equity = None
         market_cap = None
         quote_type = None
         try:
             slow = t.info
             per = slow.get("trailingPE")
+            pbr = slow.get("priceToBook")
+            roe = slow.get("returnOnEquity")
+            profit_margin = slow.get("profitMargins")
+            debt_to_equity = slow.get("debtToEquity")
             mc = slow.get("marketCap")
             quote_type = slow.get("quoteType")
             if mc:
@@ -184,6 +192,10 @@ def fetch_stock(ticker, name):
             "ticker": ticker, "name": name,
             "price": round(price, 2), "change_pct": round(change_pct, 2),
             "per": round(per, 2) if per else None,
+            "pbr": round(pbr, 2) if pbr else None,
+            "roe": round(roe, 4) if roe is not None else None,
+            "profit_margin": round(profit_margin, 4) if profit_margin is not None else None,
+            "debt_to_equity": round(debt_to_equity, 1) if debt_to_equity is not None else None,
             "w52_high": round(w52_high, 2), "w52_low": round(w52_low, 2),
             "market_cap": market_cap,
             "asset_type": asset_type,               # "STOCK" | "ETF"
