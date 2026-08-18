@@ -14,7 +14,7 @@ from datetime import datetime, timezone, timedelta
 
 from scoring import (
     kospi_fear_greed, classify_fg, fg_color,
-    buffett_score, livermore_score, style_tag, trade_levels, dalio_allocation,
+    score_stock_universe, trade_levels, dalio_allocation,
 )
 
 KST = timezone(timedelta(hours=9))
@@ -149,20 +149,22 @@ def render_hero(us_score, us_rating_en, us_rating_kr, us_color, kr_score, kr_rat
   </section>'''
 
 
-def render_stock_row(s, style, levels, b_score, l_score):
+def render_stock_row(s, levels):
     chg = s["change_pct"]
     chg_color = "var(--good)" if chg >= 0 else "var(--critical)"
     chg_sign = "+" if chg >= 0 else ""
+    style = s["style"]
     entry = f'{fmt_num(levels["entry_low"])} ~ {fmt_num(levels["entry_high"])}'
     target = fmt_num(levels["target"]) if levels["target"] else "장기보유(목표가 없음)"
     stop = fmt_num(levels["stop"]) if levels["stop"] else "가격기준 손절 없음"
     style_class = "style-momentum" if "리버모어" in style else ("style-value" if "버핏" in style else "style-mixed")
+    score_label = f'종합 {s["composite_score"]:g} (가치{s["value_score"]:g}·퀄리티{s["quality_score"]:g}·모멘텀{s["momentum_score"]:g})'
     return f'''
     <tr>
       <td class="t-name"><strong>{esc(s["name"])}</strong><br><span class="t-ticker">{esc(s["ticker"])}</span></td>
       <td class="t-num" data-label="현재가/등락">{fmt_num(s["price"])} <span style="color:{chg_color}">{chg_sign}{chg:.2f}%</span></td>
       <td data-label="매매 스타일"><span class="style-pill {style_class}">{esc(style)}</span></td>
-      <td class="t-score" data-label="스코어">버핏 {b_score:g} · 리버모어 {l_score:g}</td>
+      <td class="t-score" data-label="스코어">{esc(score_label)}</td>
       <td class="t-num" data-label="매수가">{entry}</td>
       <td class="t-num" data-label="목표가">{target}</td>
       <td class="t-num" data-label="손절가">{stop}</td>
@@ -179,22 +181,14 @@ def split_stocks(stocks):
 
 
 def render_stock_table(title, stocks, top_n=5, subtitle=None, empty_note=None):
-    rows = ""
-    scored = []
-    for s in stocks:
-        s = dict(s)
-        s["pct_from_52w_high"] = pct_from_high(s["price"], s.get("w52_high"))
-        b = buffett_score(s)
-        l = livermore_score(s)
-        style = style_tag(b, l)
-        levels = trade_levels(s, style)
-        scored.append((s, style, levels, b, l))
-
-    scored.sort(key=lambda t: max(t[3], t[4]), reverse=True)
+    scored = score_stock_universe(stocks)  # 가치·퀄리티·모멘텀 3팩터, 종합점수 내림차순 정렬
     total = len(scored)
     shown = scored[:top_n] if top_n else scored
-    for s, style, levels, b, l in shown:
-        rows += render_stock_row(s, style, levels, b, l)
+
+    rows = ""
+    for s in shown:
+        levels = trade_levels(s, s["style"])
+        rows += render_stock_row(s, levels)
 
     subtitle_html = f'<p class="card-subtitle">{esc(subtitle)}</p>' if subtitle else ""
 
@@ -209,8 +203,8 @@ def render_stock_table(title, stocks, top_n=5, subtitle=None, empty_note=None):
 
     note = ""
     if total > len(shown):
-        note = (f'<p class="card-subtitle" style="margin-top:8px">전체 {total}종목을 버핏·리버모어 스코어로 '
-                f'스크리닝한 뒤, 스코어 상위 {len(shown)}종목만 표시합니다.</p>')
+        note = (f'<p class="card-subtitle" style="margin-top:8px">전체 {total}종목을 가치·퀄리티·모멘텀 3팩터 '
+                f'종합점수로 스크리닝한 뒤, 상위 {len(shown)}종목만 표시합니다.</p>')
 
     return f'''
     <section class="card">
@@ -464,7 +458,6 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   {kr_stock_table}
   {kr_etf_table}
   {us_stock_table}
-  {us_etf_table}
   {allocation_section}
   {guru_section}
 
@@ -553,17 +546,17 @@ def main():
     ])
 
     kr_individual, kr_etf = split_stocks(data["kr_stocks"])
-    us_individual, us_etf = split_stocks(data["us_stocks"])
+    us_individual, _us_etf = split_stocks(data["us_stocks"])  # 미국 ETF는 대시보드에 표시하지 않음
 
-    stock_subtitle = "거래대금 상위 종목 중 개별주만 버핏·리버모어 스코어로 채점한 TOP 5입니다. 레버리지/인버스 상품은 제외했습니다."
-    etf_subtitle = ("거래대금 상위 종목 중 일반 ETF만 채점한 TOP 5입니다. 레버리지/인버스 ETF는 일간 재조정(decay) 구조상 "
-                     "가치·모멘텀 분석과 맞지 않아 추천에서 제외했습니다.")
+    stock_subtitle = ("거래대금 상위 종목 중 개별주만 가치·퀄리티·모멘텀 3팩터(유니버스 내 상대순위) 종합점수로 "
+                       "채점한 TOP 5입니다. 레버리지/인버스 상품은 제외했습니다.")
+    etf_subtitle = ("거래대금 상위 종목 중 일반 ETF만 같은 3팩터 방식으로 채점한 TOP 5입니다. 레버리지/인버스 ETF는 "
+                     "일간 재조정(decay) 구조상 가치·모멘텀 분석과 맞지 않아 추천에서 제외했습니다.")
     etf_empty = "오늘 스크리닝된 상위 종목 중 (레버리지/인버스 제외) 일반 ETF가 없습니다."
 
     kr_stock_table = render_stock_table("🇰🇷 국내 개별종목 매매전략 TOP 5", kr_individual, top_n=5, subtitle=stock_subtitle)
     kr_etf_table = render_stock_table("🇰🇷 국내 ETF 매매전략 TOP 5", kr_etf, top_n=5, subtitle=etf_subtitle, empty_note=etf_empty)
     us_stock_table = render_stock_table("🇺🇸 미국 개별종목 매매전략 TOP 5", us_individual, top_n=5, subtitle=stock_subtitle)
-    us_etf_table = render_stock_table("🇺🇸 미국 ETF 매매전략 TOP 5", us_etf, top_n=5, subtitle=etf_subtitle, empty_note=etf_empty)
 
     alloc = dalio_allocation(kr_fg["score"])
     allocation_section = render_allocation(alloc)
@@ -584,7 +577,6 @@ def main():
         kr_stock_table=kr_stock_table,
         kr_etf_table=kr_etf_table,
         us_stock_table=us_stock_table,
-        us_etf_table=us_etf_table,
         allocation_section=allocation_section,
         guru_section=guru_section,
     )
