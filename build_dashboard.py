@@ -68,6 +68,17 @@ def gauge_svg(score, color, size=220):
     </svg>'''
 
 
+FG_SCALE = [
+    ("#d03b3b", "극단공포"), ("#ec835a", "공포"), ("#898781", "중립"),
+    ("#0ca30c", "탐욕"), ("#006300", "극단탐욕"),
+]
+
+
+def fg_scale_legend():
+    dots = "".join(f'<span><i style="background:{c}"></i>{esc(l)}</span>' for c, l in FG_SCALE)
+    return f'<div class="fg-scale">{dots}</div>'
+
+
 def render_fg_card(title, subtitle, score, rating_kr, color, components, insight=None, source_note=None):
     comp_rows = ""
     for c in components:
@@ -90,12 +101,52 @@ def render_fg_card(title, subtitle, score, rating_kr, color, components, insight
         <div class="gauge-wrap">
           {gauge_svg(score, color)}
           <div class="gauge-label" style="color:{color}">{esc(rating_kr)}</div>
+          {fg_scale_legend()}
         </div>
         <div class="comp-list">{comp_rows}</div>
       </div>
       {insight_html}
       {source_html}
     </section>'''
+
+
+def market_mood_headline(us_score, us_rating_en, kr_score, kr_rating_en):
+    diff = abs(us_score - kr_score)
+    us_extreme = "Extreme" in us_rating_en
+    kr_extreme = "Extreme" in kr_rating_en
+    us_greed = "Greed" in us_rating_en
+    kr_greed = "Greed" in kr_rating_en
+    same_side = (us_greed == kr_greed) and "Neutral" not in us_rating_en and "Neutral" not in kr_rating_en
+
+    if diff >= 15:
+        return "미국과 한국의 투자심리가 뚜렷하게 엇갈리고 있어요 — 지역 분산을 점검해볼 만한 구간입니다."
+    if same_side and (us_extreme or kr_extreme):
+        return "미국·한국 모두 극단적인 심리 국면에 가까워요 — 되돌림 가능성을 염두에 두고 리스크 관리를 우선하세요."
+    if same_side:
+        return "미국·한국 투자심리가 비슷한 방향을 가리키고 있어요."
+    return "미국과 한국의 심리 온도차가 크지 않아요 — 지표별 세부 내용을 함께 살펴보세요."
+
+
+def render_hero(us_score, us_rating_en, us_rating_kr, us_color, kr_score, kr_rating_en, kr_rating_kr, kr_color):
+    headline = market_mood_headline(us_score, us_rating_en, kr_score, kr_rating_en)
+    return f'''
+  <section class="hero">
+    <div class="eyebrow hero-eyebrow">오늘의 시장 심리</div>
+    <div class="hero-row">
+      <div class="hero-stat">
+        <div class="hero-flagline">🇺🇸 미국</div>
+        <div class="hero-num" style="color:{us_color}">{us_score:g}</div>
+        <div class="hero-tag" style="color:{us_color}">{esc(us_rating_kr)}</div>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-flagline">🇰🇷 한국</div>
+        <div class="hero-num" style="color:{kr_color}">{kr_score:g}</div>
+        <div class="hero-tag" style="color:{kr_color}">{esc(kr_rating_kr)}</div>
+      </div>
+    </div>
+    <p class="hero-headline">{esc(headline)}</p>
+  </section>'''
 
 
 def render_stock_row(s, style, levels, b_score, l_score):
@@ -105,16 +156,17 @@ def render_stock_row(s, style, levels, b_score, l_score):
     entry = f'{fmt_num(levels["entry_low"])} ~ {fmt_num(levels["entry_high"])}'
     target = fmt_num(levels["target"]) if levels["target"] else "장기보유(목표가 없음)"
     stop = fmt_num(levels["stop"]) if levels["stop"] else "가격기준 손절 없음"
+    style_class = "style-momentum" if "리버모어" in style else ("style-value" if "버핏" in style else "style-mixed")
     return f'''
     <tr>
       <td class="t-name"><strong>{esc(s["name"])}</strong><br><span class="t-ticker">{esc(s["ticker"])}</span></td>
-      <td class="t-num">{fmt_num(s["price"])}<br><span style="color:{chg_color}">{chg_sign}{chg:.2f}%</span></td>
-      <td class="t-style">{esc(style)}</td>
-      <td class="t-score">버핏 {b_score:g} / 리버모어 {l_score:g}</td>
-      <td class="t-num">{entry}</td>
-      <td class="t-num">{target}</td>
-      <td class="t-num">{stop}</td>
-      <td class="t-note">{esc(levels["note"])}</td>
+      <td class="t-num" data-label="현재가/등락">{fmt_num(s["price"])} <span style="color:{chg_color}">{chg_sign}{chg:.2f}%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill {style_class}">{esc(style)}</span></td>
+      <td class="t-score" data-label="스코어">버핏 {b_score:g} · 리버모어 {l_score:g}</td>
+      <td class="t-num" data-label="매수가">{entry}</td>
+      <td class="t-num" data-label="목표가">{target}</td>
+      <td class="t-num" data-label="손절가">{stop}</td>
+      <td class="t-note" data-label="전략 메모">{esc(levels["note"])}</td>
     </tr>'''
 
 
@@ -159,11 +211,16 @@ def render_stock_table(title, stocks, top_n=20):
     </section>'''
 
 
+ALLOC_HUES = ["#2a78d6", "#1baf7a", "#eda100", "#4a3aa7", "#e87ba4"]
+
+
 def render_allocation(alloc):
+    pairs = [(k, v) for k, v in alloc.items() if k != "tilt_note"]
     items = "".join(
-        f'<div class="alloc-item"><div class="alloc-bar" style="width:{v}%"></div>'
+        f'<div class="alloc-item">'
+        f'<div class="alloc-bar" style="width:{v}%; background:{ALLOC_HUES[i % len(ALLOC_HUES)]}"></div>'
         f'<span class="alloc-label">{esc(k)}</span><span class="alloc-pct">{v:g}%</span></div>'
-        for k, v in alloc.items() if k != "tilt_note"
+        for i, (k, v) in enumerate(pairs)
     )
     return f'''
     <section class="card">
@@ -223,6 +280,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     --critical: #d03b3b;
     --series-blue: #2a78d6;
     --gauge-track: #e1e0d9;
+    --shadow: 0 1px 2px rgba(11,11,11,0.04), 0 6px 20px rgba(11,11,11,0.05);
   }}
   @media (prefers-color-scheme: dark) {{
     :root:where(:not([data-theme="light"])) .viz-root {{
@@ -240,6 +298,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
       --critical: #e66767;
       --series-blue: #3987e5;
       --gauge-track: #383835;
+      --shadow: 0 1px 2px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.35);
     }}
   }}
   * {{ box-sizing: border-box; }}
@@ -252,25 +311,49 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   }}
   .wrap {{ max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }}
-  header.top {{ padding: 8px 0 20px; border-bottom: 1px solid var(--gridline); margin-bottom: 20px; }}
-  header.top h1 {{ font-size: 22px; margin: 0 0 6px; }}
-  header.top p {{ margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }}
+  header.top {{ padding: 8px 0 20px; margin-bottom: 4px; }}
+  header.top h1 {{ font-size: 24px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 6px; }}
+  header.top p {{ margin: 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }}
+  .eyebrow {{
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 6px;
+  }}
+  .hero {{
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }}
+  .hero-eyebrow {{ text-align: center; }}
+  .hero-row {{ display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; margin: 6px 0 10px; }}
+  .hero-stat {{ min-width: 110px; }}
+  .hero-flagline {{ font-size: 13px; color: var(--text-secondary); font-weight: 600; margin-bottom: 2px; }}
+  .hero-num {{ font-size: 44px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }}
+  .hero-tag {{ font-size: 13px; font-weight: 700; }}
+  .hero-divider {{ width: 1px; height: 46px; background: var(--gridline); }}
+  .hero-headline {{ font-size: 13.5px; color: var(--text-secondary); margin: 6px auto 0; max-width: 640px; line-height: 1.6; }}
   .card {{
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: 14px;
+    box-shadow: var(--shadow);
     padding: 20px 22px;
     margin-bottom: 18px;
   }}
-  .card h2 {{ font-size: 16px; margin: 0 0 4px; }}
+  .card h2 {{ font-size: 16px; font-weight: 700; margin: 0 0 4px; }}
   .card-subtitle {{ color: var(--text-secondary); font-size: 12.5px; margin: 0 0 14px; }}
   .two-col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }}
-  @media (max-width: 760px) {{ .two-col {{ grid-template-columns: 1fr; }} }}
+  @media (max-width: 760px) {{ .two-col {{ grid-template-columns: 1fr; }} .hero-row {{ gap: 18px; }} .hero-num {{ font-size: 38px; }} }}
   .fg-body {{ display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }}
   .gauge-wrap {{ text-align: center; min-width: 200px; }}
   .gauge-svg {{ width: 220px; max-width: 100%; }}
   .gauge-num {{ font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }}
   .gauge-label {{ font-size: 15px; font-weight: 700; margin-top: -8px; }}
+  .fg-scale {{ display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; font-size: 10px; color: var(--text-muted); margin-top: 10px; }}
+  .fg-scale i {{ display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }}
   .comp-list {{ flex: 1; min-width: 220px; }}
   .comp-row {{ display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }}
   .comp-name {{ flex: 0 0 44%; font-size: 12px; color: var(--text-secondary); }}
@@ -281,26 +364,50 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   .fg-source {{ font-size: 11px; color: var(--text-muted); margin: 6px 0 0; }}
   .idx-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }}
   @media (max-width: 760px) {{ .idx-grid {{ grid-template-columns: repeat(2, 1fr); }} }}
-  .idx-tile {{ background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }}
-  .idx-tile .idx-name {{ font-size: 12px; color: var(--text-secondary); }}
-  .idx-tile .idx-val {{ font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }}
-  .idx-tile .idx-chg {{ font-size: 12px; font-variant-numeric: tabular-nums; }}
+  .idx-tile {{ background: var(--page); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; }}
+  .idx-tile .idx-name {{ font-size: 11.5px; color: var(--text-secondary); font-weight: 600; }}
+  .idx-tile .idx-val {{ font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 3px; }}
+  .idx-tile .idx-chg {{ font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 600; margin-top: 1px; }}
   table.stock-table {{ border-collapse: collapse; width: 100%; font-size: 12.5px; }}
   .table-wrap {{ overflow-x: auto; }}
   table.stock-table th {{
-    text-align: left; font-weight: 600; color: var(--text-secondary);
+    text-align: left; font-weight: 700; color: var(--text-muted); font-size: 11px;
+    letter-spacing: 0.02em; text-transform: uppercase;
     border-bottom: 1px solid var(--gridline); padding: 8px 10px; white-space: nowrap;
   }}
+  table.stock-table tbody tr:nth-child(odd) {{ background: color-mix(in srgb, var(--page) 55%, transparent); }}
   table.stock-table td {{ padding: 10px; border-bottom: 1px solid var(--gridline); vertical-align: top; }}
   table.stock-table tr:last-child td {{ border-bottom: none; }}
   .t-ticker {{ color: var(--text-muted); font-size: 11px; }}
   .t-num {{ font-variant-numeric: tabular-nums; white-space: nowrap; }}
   .t-note {{ color: var(--text-secondary); min-width: 220px; }}
+  .style-pill {{
+    display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    white-space: nowrap; border: 1px solid var(--border);
+  }}
+  .style-momentum {{ color: #e34948; background: color-mix(in srgb, #e34948 12%, transparent); }}
+  .style-value {{ color: #1c5cab; background: color-mix(in srgb, #1c5cab 12%, transparent); }}
+  .style-mixed {{ color: #7a6b1f; background: color-mix(in srgb, #eda100 16%, transparent); }}
   .alloc-list {{ display: flex; flex-direction: column; gap: 10px; }}
-  .alloc-item {{ position: relative; background: var(--page); border-radius: 8px; height: 34px; overflow: hidden; border: 1px solid var(--border); }}
-  .alloc-bar {{ position: absolute; left: 0; top: 0; bottom: 0; background: var(--series-blue); opacity: .25; }}
-  .alloc-label {{ position: absolute; left: 12px; top: 8px; font-size: 12.5px; font-weight: 600; }}
-  .alloc-pct {{ position: absolute; right: 12px; top: 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 700; }}
+  .alloc-item {{ position: relative; background: var(--page); border-radius: 8px; height: 36px; overflow: hidden; border: 1px solid var(--border); }}
+  .alloc-bar {{ position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 8px 8px 0; opacity: .55; }}
+  .alloc-label {{ position: absolute; left: 12px; top: 9px; font-size: 12.5px; font-weight: 700; }}
+  .alloc-pct {{ position: absolute; right: 12px; top: 9px; font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 800; }}
+
+  @media (max-width: 700px) {{
+    table.stock-table thead {{ display: none; }}
+    table.stock-table, table.stock-table tbody {{ display: block; width: 100%; }}
+    table.stock-table tr {{
+      display: block; border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 10px; padding: 12px 14px; background: var(--page);
+    }}
+    table.stock-table tr:last-child {{ margin-bottom: 0; }}
+    table.stock-table td {{ display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border-bottom: none; }}
+    table.stock-table td[data-label]::before {{ content: attr(data-label); font-size: 11px; color: var(--text-muted); font-weight: 600; }}
+    table.stock-table td.t-name {{ display: block; padding-bottom: 8px; margin-bottom: 6px; border-bottom: 1px dashed var(--gridline); font-size: 14px; }}
+    table.stock-table td.t-note {{ display: block; }}
+    table.stock-table td.t-note::before {{ content: "전략 메모"; display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }}
+  }}
   .guru-grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }}
   @media (max-width: 760px) {{ .guru-grid {{ grid-template-columns: 1fr; }} }}
   .guru-card {{ background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }}
@@ -319,6 +426,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <h1>📊 공포탐욕지수 &amp; 대가 매매전략 대시보드</h1>
     <p>생성 시각: {generated_at_label} · {data_asof_note}</p>
   </header>
+
+  {hero_section}
 
   <div class="two-col">
     {us_fg_card}
@@ -426,9 +535,15 @@ def main():
     allocation_section = render_allocation(alloc)
     guru_section = render_guru_section()
 
+    hero_section = render_hero(
+        us["score"], us["rating_en"], us["rating_kr"], fg_color(us["rating_en"]),
+        kr_fg["score"], kr_fg["rating_en"], kr_fg["rating_kr"], kr_fg["color"],
+    )
+
     html_out = PAGE_TEMPLATE.format(
         generated_at_label=esc(data["generated_at_label"]),
         data_asof_note=esc(data["data_asof_note"]),
+        hero_section=hero_section,
         us_fg_card=us_card,
         kr_fg_card=kr_card,
         index_tiles=index_tiles,
