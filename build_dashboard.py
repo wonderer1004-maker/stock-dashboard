@@ -170,7 +170,15 @@ def render_stock_row(s, style, levels, b_score, l_score):
     </tr>'''
 
 
-def render_stock_table(title, stocks, top_n=20):
+def split_stocks(stocks):
+    """레버리지/인버스 상품을 제외하고 개별종목/ETF로 분리."""
+    clean = [s for s in stocks if not s.get("is_leveraged_inverse")]
+    individual = [s for s in clean if s.get("asset_type", "STOCK") != "ETF"]
+    etfs = [s for s in clean if s.get("asset_type", "STOCK") == "ETF"]
+    return individual, etfs
+
+
+def render_stock_table(title, stocks, top_n=5, subtitle=None, empty_note=None):
     rows = ""
     scored = []
     for s in stocks:
@@ -188,6 +196,17 @@ def render_stock_table(title, stocks, top_n=20):
     for s, style, levels, b, l in shown:
         rows += render_stock_row(s, style, levels, b, l)
 
+    subtitle_html = f'<p class="card-subtitle">{esc(subtitle)}</p>' if subtitle else ""
+
+    if not shown:
+        body = f'<p class="card-subtitle" style="margin-top:8px">{esc(empty_note or "오늘 스크리닝된 종목이 없습니다.")}</p>'
+        return f'''
+    <section class="card">
+      <h2>{esc(title)}</h2>
+      {subtitle_html}
+      {body}
+    </section>'''
+
     note = ""
     if total > len(shown):
         note = (f'<p class="card-subtitle" style="margin-top:8px">전체 {total}종목을 버핏·리버모어 스코어로 '
@@ -196,6 +215,7 @@ def render_stock_table(title, stocks, top_n=20):
     return f'''
     <section class="card">
       <h2>{esc(title)}</h2>
+      {subtitle_html}
       <div class="table-wrap">
         <table class="stock-table">
           <thead>
@@ -442,7 +462,9 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   </section>
 
   {kr_stock_table}
+  {kr_etf_table}
   {us_stock_table}
+  {us_etf_table}
   {allocation_section}
   {guru_section}
 
@@ -530,8 +552,18 @@ def main():
         tile(vkospi_label, fmt_num(vkospi["value"]), f'{vkospi["change"]:+.2f}', vkospi["asof"]),
     ])
 
-    kr_stock_table = render_stock_table("🇰🇷 국내 종목 매매전략 (코스피/코스닥 스크리닝)", data["kr_stocks"])
-    us_stock_table = render_stock_table("🇺🇸 미국 종목 매매전략 (대형주 스크리닝)", data["us_stocks"])
+    kr_individual, kr_etf = split_stocks(data["kr_stocks"])
+    us_individual, us_etf = split_stocks(data["us_stocks"])
+
+    stock_subtitle = "거래대금 상위 종목 중 개별주만 버핏·리버모어 스코어로 채점한 TOP 5입니다. 레버리지/인버스 상품은 제외했습니다."
+    etf_subtitle = ("거래대금 상위 종목 중 일반 ETF만 채점한 TOP 5입니다. 레버리지/인버스 ETF는 일간 재조정(decay) 구조상 "
+                     "가치·모멘텀 분석과 맞지 않아 추천에서 제외했습니다.")
+    etf_empty = "오늘 스크리닝된 상위 종목 중 (레버리지/인버스 제외) 일반 ETF가 없습니다."
+
+    kr_stock_table = render_stock_table("🇰🇷 국내 개별종목 매매전략 TOP 5", kr_individual, top_n=5, subtitle=stock_subtitle)
+    kr_etf_table = render_stock_table("🇰🇷 국내 ETF 매매전략 TOP 5", kr_etf, top_n=5, subtitle=etf_subtitle, empty_note=etf_empty)
+    us_stock_table = render_stock_table("🇺🇸 미국 개별종목 매매전략 TOP 5", us_individual, top_n=5, subtitle=stock_subtitle)
+    us_etf_table = render_stock_table("🇺🇸 미국 ETF 매매전략 TOP 5", us_etf, top_n=5, subtitle=etf_subtitle, empty_note=etf_empty)
 
     alloc = dalio_allocation(kr_fg["score"])
     allocation_section = render_allocation(alloc)
@@ -550,7 +582,9 @@ def main():
         kr_fg_card=kr_card,
         index_tiles=index_tiles,
         kr_stock_table=kr_stock_table,
+        kr_etf_table=kr_etf_table,
         us_stock_table=us_stock_table,
+        us_etf_table=us_etf_table,
         allocation_section=allocation_section,
         guru_section=guru_section,
     )
