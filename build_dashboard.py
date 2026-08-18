@@ -488,8 +488,10 @@ def main():
         # fetch_data.py 가 실현변동성 백분위로 이미 0~100 점수를 계산해 넘겨준 경우
         vol_score = max(0, min(100, vol_override))
     else:
-        # 수기 입력(make_data.py) 경로: V-KOSPI류 지수값(대략 12~45 레인지)을 직접 스케일링
-        vol_score = max(0, min(100, 100 - (vkospi["value"] - 12) / (45 - 12) * 100))
+        # 수기 입력(make_data.py) 경로: V-KOSPI류 지수값을 스케일링.
+        # 상한을 45로 좁게 잡으면 실제 위기 국면(50~80대)에서 전부 0으로 눌려버려
+        # 세밀한 구분이 사라지므로, 과거 실제 VKOSPI/VIX 위기 국면(~80)을 반영해 10~80 레인지로 완화.
+        vol_score = max(0, min(100, 100 - (vkospi["value"] - 10) / (80 - 10) * 100))
     breadth = max(0, min(100, 50 + (kospi["change_pct"] - kosdaq["change_pct"]) * 5))
     safehaven = max(0, min(100, 50 - usdkrw["change_pct"] * 10))
     sentiment = max(0, min(100, 50 + kospi["change_pct"] * 6))
