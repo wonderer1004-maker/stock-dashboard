@@ -548,15 +548,17 @@ def main():
     kr_individual, kr_etf = split_stocks(data["kr_stocks"])
     us_individual, _us_etf = split_stocks(data["us_stocks"])  # 미국 ETF는 대시보드에 표시하지 않음
 
-    stock_subtitle = ("거래대금 상위 종목 중 개별주만 가치·퀄리티·모멘텀 3팩터(유니버스 내 상대순위) 종합점수로 "
-                       "채점한 TOP 5입니다. 레버리지/인버스 상품은 제외했습니다.")
-    etf_subtitle = ("거래대금 상위 종목 중 일반 ETF만 같은 3팩터 방식으로 채점한 TOP 5입니다. 레버리지/인버스 ETF는 "
-                     "일간 재조정(decay) 구조상 가치·모멘텀 분석과 맞지 않아 추천에서 제외했습니다.")
+    TOP_N = 10
+
+    stock_subtitle = (f"거래대금 상위 종목 중 개별주만 가치·퀄리티·모멘텀 3팩터(유니버스 내 상대순위) 종합점수로 "
+                       f"채점한 TOP {TOP_N}입니다. 레버리지/인버스 상품은 제외했습니다.")
+    etf_subtitle = (f"거래대금 상위 종목 중 일반 ETF만 같은 3팩터 방식으로 채점한 TOP {TOP_N}입니다. 레버리지/인버스 ETF는 "
+                     f"일간 재조정(decay) 구조상 가치·모멘텀 분석과 맞지 않아 추천에서 제외했습니다.")
     etf_empty = "오늘 스크리닝된 상위 종목 중 (레버리지/인버스 제외) 일반 ETF가 없습니다."
 
-    kr_stock_table = render_stock_table("🇰🇷 국내 개별종목 매매전략 TOP 5", kr_individual, top_n=5, subtitle=stock_subtitle)
-    kr_etf_table = render_stock_table("🇰🇷 국내 ETF 매매전략 TOP 5", kr_etf, top_n=5, subtitle=etf_subtitle, empty_note=etf_empty)
-    us_stock_table = render_stock_table("🇺🇸 미국 개별종목 매매전략 TOP 5", us_individual, top_n=5, subtitle=stock_subtitle)
+    kr_stock_table = render_stock_table(f"🇰🇷 국내 개별종목 매매전략 TOP {TOP_N}", kr_individual, top_n=TOP_N, subtitle=stock_subtitle)
+    kr_etf_table = render_stock_table(f"🇰🇷 국내 ETF 매매전략 TOP {TOP_N}", kr_etf, top_n=TOP_N, subtitle=etf_subtitle, empty_note=etf_empty)
+    us_stock_table = render_stock_table(f"🇺🇸 미국 개별종목 매매전략 TOP {TOP_N}", us_individual, top_n=TOP_N, subtitle=stock_subtitle)
 
     alloc = dalio_allocation(kr_fg["score"])
     allocation_section = render_allocation(alloc)
