@@ -20,6 +20,7 @@
     --critical: #d03b3b;
     --series-blue: #2a78d6;
     --gauge-track: #e1e0d9;
+    --shadow: 0 1px 2px rgba(11,11,11,0.04), 0 6px 20px rgba(11,11,11,0.05);
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) .viz-root {
@@ -37,6 +38,7 @@
       --critical: #e66767;
       --series-blue: #3987e5;
       --gauge-track: #383835;
+      --shadow: 0 1px 2px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.35);
     }
   }
   * { box-sizing: border-box; }
@@ -49,25 +51,49 @@
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
-  header.top { padding: 8px 0 20px; border-bottom: 1px solid var(--gridline); margin-bottom: 20px; }
-  header.top h1 { font-size: 22px; margin: 0 0 6px; }
-  header.top p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  header.top { padding: 8px 0 20px; margin-bottom: 4px; }
+  header.top h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 6px; }
+  header.top p { margin: 0; color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin: 0 0 6px;
+  }
+  .hero {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .hero-eyebrow { text-align: center; }
+  .hero-row { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; margin: 6px 0 10px; }
+  .hero-stat { min-width: 110px; }
+  .hero-flagline { font-size: 13px; color: var(--text-secondary); font-weight: 600; margin-bottom: 2px; }
+  .hero-num { font-size: 44px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .hero-tag { font-size: 13px; font-weight: 700; }
+  .hero-divider { width: 1px; height: 46px; background: var(--gridline); }
+  .hero-headline { font-size: 13.5px; color: var(--text-secondary); margin: 6px auto 0; max-width: 640px; line-height: 1.6; }
   .card {
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: 14px;
+    box-shadow: var(--shadow);
     padding: 20px 22px;
     margin-bottom: 18px;
   }
-  .card h2 { font-size: 16px; margin: 0 0 4px; }
+  .card h2 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
   .card-subtitle { color: var(--text-secondary); font-size: 12.5px; margin: 0 0 14px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } .hero-row { gap: 18px; } .hero-num { font-size: 38px; } }
   .fg-body { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
   .gauge-wrap { text-align: center; min-width: 200px; }
   .gauge-svg { width: 220px; max-width: 100%; }
   .gauge-num { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .gauge-label { font-size: 15px; font-weight: 700; margin-top: -8px; }
+  .fg-scale { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; font-size: 10px; color: var(--text-muted); margin-top: 10px; }
+  .fg-scale i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 3px; vertical-align: middle; }
   .comp-list { flex: 1; min-width: 220px; }
   .comp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .comp-name { flex: 0 0 44%; font-size: 12px; color: var(--text-secondary); }
@@ -78,26 +104,50 @@
   .fg-source { font-size: 11px; color: var(--text-muted); margin: 6px 0 0; }
   .idx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
   @media (max-width: 760px) { .idx-grid { grid-template-columns: repeat(2, 1fr); } }
-  .idx-tile { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-  .idx-tile .idx-name { font-size: 12px; color: var(--text-secondary); }
-  .idx-tile .idx-val { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
-  .idx-tile .idx-chg { font-size: 12px; font-variant-numeric: tabular-nums; }
+  .idx-tile { background: var(--page); border: 1px solid var(--border); border-radius: 12px; padding: 13px 15px; }
+  .idx-tile .idx-name { font-size: 11.5px; color: var(--text-secondary); font-weight: 600; }
+  .idx-tile .idx-val { font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 3px; }
+  .idx-tile .idx-chg { font-size: 12px; font-variant-numeric: tabular-nums; font-weight: 600; margin-top: 1px; }
   table.stock-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
   .table-wrap { overflow-x: auto; }
   table.stock-table th {
-    text-align: left; font-weight: 600; color: var(--text-secondary);
+    text-align: left; font-weight: 700; color: var(--text-muted); font-size: 11px;
+    letter-spacing: 0.02em; text-transform: uppercase;
     border-bottom: 1px solid var(--gridline); padding: 8px 10px; white-space: nowrap;
   }
+  table.stock-table tbody tr:nth-child(odd) { background: color-mix(in srgb, var(--page) 55%, transparent); }
   table.stock-table td { padding: 10px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
   table.stock-table tr:last-child td { border-bottom: none; }
   .t-ticker { color: var(--text-muted); font-size: 11px; }
   .t-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .t-note { color: var(--text-secondary); min-width: 220px; }
+  .style-pill {
+    display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    white-space: nowrap; border: 1px solid var(--border);
+  }
+  .style-momentum { color: #e34948; background: color-mix(in srgb, #e34948 12%, transparent); }
+  .style-value { color: #1c5cab; background: color-mix(in srgb, #1c5cab 12%, transparent); }
+  .style-mixed { color: #7a6b1f; background: color-mix(in srgb, #eda100 16%, transparent); }
   .alloc-list { display: flex; flex-direction: column; gap: 10px; }
-  .alloc-item { position: relative; background: var(--page); border-radius: 8px; height: 34px; overflow: hidden; border: 1px solid var(--border); }
-  .alloc-bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--series-blue); opacity: .25; }
-  .alloc-label { position: absolute; left: 12px; top: 8px; font-size: 12.5px; font-weight: 600; }
-  .alloc-pct { position: absolute; right: 12px; top: 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .alloc-item { position: relative; background: var(--page); border-radius: 8px; height: 36px; overflow: hidden; border: 1px solid var(--border); }
+  .alloc-bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 8px 8px 0; opacity: .55; }
+  .alloc-label { position: absolute; left: 12px; top: 9px; font-size: 12.5px; font-weight: 700; }
+  .alloc-pct { position: absolute; right: 12px; top: 9px; font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 800; }
+
+  @media (max-width: 700px) {
+    table.stock-table thead { display: none; }
+    table.stock-table, table.stock-table tbody { display: block; width: 100%; }
+    table.stock-table tr {
+      display: block; border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 10px; padding: 12px 14px; background: var(--page);
+    }
+    table.stock-table tr:last-child { margin-bottom: 0; }
+    table.stock-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border-bottom: none; }
+    table.stock-table td[data-label]::before { content: attr(data-label); font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    table.stock-table td.t-name { display: block; padding-bottom: 8px; margin-bottom: 6px; border-bottom: 1px dashed var(--gridline); font-size: 14px; }
+    table.stock-table td.t-note { display: block; }
+    table.stock-table td.t-note::before { content: "전략 메모"; display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+  }
   .guru-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   @media (max-width: 760px) { .guru-grid { grid-template-columns: 1fr; } }
   .guru-card { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
@@ -114,8 +164,27 @@
 <div class="wrap">
   <header class="top">
     <h1>📊 공포탐욕지수 &amp; 대가 매매전략 대시보드</h1>
-    <p>생성 시각: 2026-08-18 13:35 KST · 미국 지표는 CNN/야후파이낸스 최신 종가, 한국 지표는 야후파이낸스 최신 데이터 기준입니다. V-KOSPI는 실측치가 아닌 실현변동성 대체 지표입니다.</p>
+    <p>생성 시각: 2026-08-18 21:58 KST · 미국 지표는 CNN/야후파이낸스 최신 종가, 한국 지표는 야후파이낸스 최신 데이터 기준입니다. V-KOSPI는 실측치가 아닌 실현변동성 대체 지표입니다. 종목 유니버스: 한국: 코스피 거래대금 상위 100 (코스닥 제외, 네이버금융 실시간 랭킹) · 미국: 거래대금(거래량) 상위 100종목 (야후파이낸스 스크리너)</p>
   </header>
+
+  
+  <section class="hero">
+    <div class="eyebrow hero-eyebrow">오늘의 시장 심리</div>
+    <div class="hero-row">
+      <div class="hero-stat">
+        <div class="hero-flagline">🇺🇸 미국</div>
+        <div class="hero-num" style="color:#0ca30c">59.49</div>
+        <div class="hero-tag" style="color:#0ca30c">탐욕</div>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-flagline">🇰🇷 한국</div>
+        <div class="hero-num" style="color:#ec835a">42.2</div>
+        <div class="hero-tag" style="color:#ec835a">공포</div>
+      </div>
+    </div>
+    <p class="hero-headline">미국과 한국의 투자심리가 뚜렷하게 엇갈리고 있어요 — 지역 분산을 점검해볼 만한 구간입니다.</p>
+  </section>
 
   <div class="two-col">
     
@@ -125,12 +194,13 @@
       <div class="fg-body">
         <div class="gauge-wrap">
           
-    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 59.94점">
+    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 59.49점">
       <path d="M 18.0 110.0 A 92.0 92.0 0 1 1 202.0 110.0" fill="none" stroke="var(--gauge-track)" stroke-width="16" stroke-linecap="round"/>
-      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 138.3 22.4" fill="none" stroke="#0ca30c" stroke-width="16" stroke-linecap="round"/>
-      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#0ca30c">59.94</text>
+      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 137.0 22.1" fill="none" stroke="#0ca30c" stroke-width="16" stroke-linecap="round"/>
+      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#0ca30c">59.49</text>
     </svg>
           <div class="gauge-label" style="color:#0ca30c">탐욕</div>
+          <div class="fg-scale"><span><i style="background:#d03b3b"></i>극단공포</span><span><i style="background:#ec835a"></i>공포</span><span><i style="background:#898781"></i>중립</span><span><i style="background:#0ca30c"></i>탐욕</span><span><i style="background:#006300"></i>극단탐욕</span></div>
         </div>
         <div class="comp-list">
         <div class="comp-row">
@@ -145,13 +215,13 @@
         </div>
         <div class="comp-row">
           <span class="comp-name">주가 강도 (52주 신고가/신저가 비율)</span>
-          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:1%"></div></div>
-          <span class="comp-score">0.6</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:0%"></div></div>
+          <span class="comp-score">0.5</span>
         </div>
         <div class="comp-row">
           <span class="comp-name">주가 폭 (상승/하락 거래량)</span>
           <div class="comp-bar-track"><div class="comp-bar-fill" style="width:100%"></div></div>
-          <span class="comp-score">1060.4</span>
+          <span class="comp-score">1040.9</span>
         </div>
         <div class="comp-row">
           <span class="comp-name">풋/콜 옵션 비율</span>
@@ -184,18 +254,19 @@
       <div class="fg-body">
         <div class="gauge-wrap">
           
-    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 43.6점">
+    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 42.2점">
       <path d="M 18.0 110.0 A 92.0 92.0 0 1 1 202.0 110.0" fill="none" stroke="var(--gauge-track)" stroke-width="16" stroke-linecap="round"/>
-      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 91.6 19.9" fill="none" stroke="#ec835a" stroke-width="16" stroke-linecap="round"/>
-      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#ec835a">43.6</text>
+      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 87.7 20.7" fill="none" stroke="#ec835a" stroke-width="16" stroke-linecap="round"/>
+      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#ec835a">42.2</text>
     </svg>
           <div class="gauge-label" style="color:#ec835a">공포</div>
+          <div class="fg-scale"><span><i style="background:#d03b3b"></i>극단공포</span><span><i style="background:#ec835a"></i>공포</span><span><i style="background:#898781"></i>중립</span><span><i style="background:#0ca30c"></i>탐욕</span><span><i style="background:#006300"></i>극단탐욕</span></div>
         </div>
         <div class="comp-list">
         <div class="comp-row">
           <span class="comp-name">모멘텀 (52주 레인지 위치 + 당일 등락)</span>
-          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:57%"></div></div>
-          <span class="comp-score">56.7</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:53%"></div></div>
+          <span class="comp-score">52.8</span>
         </div>
         <div class="comp-row">
           <span class="comp-name">변동성 (V-KOSPI)</span>
@@ -204,21 +275,21 @@
         </div>
         <div class="comp-row">
           <span class="comp-name">시장 폭 (코스피 vs 코스닥 상대강도)</span>
-          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:58%"></div></div>
-          <span class="comp-score">57.9</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:60%"></div></div>
+          <span class="comp-score">59.9</span>
         </div>
         <div class="comp-row">
           <span class="comp-name">안전자산 수요 (원/달러 환율)</span>
-          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:52%"></div></div>
-          <span class="comp-score">52.3</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:54%"></div></div>
+          <span class="comp-score">53.6</span>
         </div>
         <div class="comp-row">
           <span class="comp-name">거래심리 (당일 강도)</span>
-          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:47%"></div></div>
-          <span class="comp-score">46.9</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:41%"></div></div>
+          <span class="comp-score">40.7</span>
         </div></div>
       </div>
-      <p class="fg-insight">💡 가격은 상승 모멘텀을 보이지만 V-KOSPI(변동성)가 매우 높은 수준입니다. 상승장 속에서도 불안정성이 큰 &#x27;살얼음판 랠리&#x27; 신호로 해석될 수 있습니다.</p>
+      
       <p class="fg-source">산출: KOSPI/KOSDAQ 지수, V-KOSPI, 원/달러 환율 기반 자체 계산 (CNN 7지표를 한국에서 구할 수 있는 5개 대체지표로 재구성)</p>
     </section>
   </div>
@@ -227,10 +298,10 @@
     <h2>핵심 시장 지표</h2>
     <div class="idx-grid">
       <div class="idx-tile"><div class="idx-name">KOSPI <span style="color:var(--text-muted)">· 2026-08-18</span></div>
-        <div class="idx-val">6,942.46</div><div class="idx-chg" style="color:var(--critical)">-0.51%</div></div><div class="idx-tile"><div class="idx-name">KOSDAQ <span style="color:var(--text-muted)">· 2026-08-18</span></div>
-        <div class="idx-val">846.60</div><div class="idx-chg" style="color:var(--critical)">-2.09%</div></div><div class="idx-tile"><div class="idx-name">USD/KRW <span style="color:var(--text-muted)">· 2026-08-18</span></div>
-        <div class="idx-val">1,412.18</div><div class="idx-chg" style="color:var(--critical)">-0.23%</div></div><div class="idx-tile"><div class="idx-name">변동성(20일 실현, 연율%) <span style="color:var(--text-muted)">· 2026-08-18</span></div>
-        <div class="idx-val">87.60</div><div class="idx-chg" style="color:var(--good)">+0.00</div></div>
+        <div class="idx-val">6,869.83</div><div class="idx-chg" style="color:var(--critical)">-1.55%</div></div><div class="idx-tile"><div class="idx-name">KOSDAQ <span style="color:var(--text-muted)">· 2026-08-18</span></div>
+        <div class="idx-val">834.20</div><div class="idx-chg" style="color:var(--critical)">-3.52%</div></div><div class="idx-tile"><div class="idx-name">USD/KRW <span style="color:var(--text-muted)">· 2026-08-18</span></div>
+        <div class="idx-val">1,410.29</div><div class="idx-chg" style="color:var(--critical)">-0.36%</div></div><div class="idx-tile"><div class="idx-name">변동성(20일 실현, 연율%) <span style="color:var(--text-muted)">· 2026-08-18</span></div>
+        <div class="idx-val">87.79</div><div class="idx-chg" style="color:var(--good)">+0.00</div></div>
     </div>
   </section>
 
@@ -247,137 +318,208 @@
           </thead>
           <tbody>
     <tr>
+      <td class="t-name"><strong>KODEX 200선물인버스2X</strong><br><span class="t-ticker">252670.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">79 <span style="color:var(--good)">+3.95%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 27.9</td>
+      <td class="t-num" data-label="매수가">73.47 ~ 79</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>TIGER 200선물인버스2X</strong><br><span class="t-ticker">252710.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">86 <span style="color:var(--good)">+3.61%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 27.2</td>
+      <td class="t-num" data-label="매수가">79.98 ~ 86</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>KODEX 코스닥150레버리지</strong><br><span class="t-ticker">233740.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">7,155 <span style="color:var(--critical)">-8.45%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 3.1</td>
+      <td class="t-num" data-label="매수가">6,654.15 ~ 7,155</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>흥아해운</strong><br><span class="t-ticker">003280.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">1,934 <span style="color:var(--good)">+12.90%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 40</td>
+      <td class="t-num" data-label="매수가">1,798.62 ~ 1,934</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>일신석재</strong><br><span class="t-ticker">007110.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">698 <span style="color:var(--good)">+22.24%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 40</td>
+      <td class="t-num" data-label="매수가">649.14 ~ 698</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>TIGER 반도체TOP10</strong><br><span class="t-ticker">396500.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">35,940 <span style="color:var(--critical)">-0.83%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 34.4</td>
+      <td class="t-num" data-label="매수가">33,424.20 ~ 35,940</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>후성</strong><br><span class="t-ticker">093370.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">12,970 <span style="color:var(--good)">+4.60%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 35.3</td>
+      <td class="t-num" data-label="매수가">12,062.10 ~ 12,970</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>신원</strong><br><span class="t-ticker">009270.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">1,160 <span style="color:var(--good)">+8.41%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 48.8</td>
+      <td class="t-num" data-label="매수가">1,078.80 ~ 1,160</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>KIWOOM 200선물인버스2X</strong><br><span class="t-ticker">253230.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">79 <span style="color:var(--good)">+3.95%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 27.9</td>
+      <td class="t-num" data-label="매수가">73.47 ~ 79</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>형지엘리트</strong><br><span class="t-ticker">093240.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">401 <span style="color:var(--good)">+3.35%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 26.7</td>
+      <td class="t-num" data-label="매수가">372.93 ~ 401</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>대한해운</strong><br><span class="t-ticker">005880.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">2,075 <span style="color:var(--good)">+1.97%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 37.5</td>
+      <td class="t-num" data-label="매수가">1,929.75 ~ 2,075</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>KODEX 반도체레버리지</strong><br><span class="t-ticker">494310.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">76,210 <span style="color:var(--critical)">-1.05%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 17.9</td>
+      <td class="t-num" data-label="매수가">70,875.30 ~ 76,210</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
       <td class="t-name"><strong>SK하이닉스</strong><br><span class="t-ticker">000660.KS</span></td>
-      <td class="t-num">1,685,000<br><span style="color:var(--good)">+2.03%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 31.7</td>
-      <td class="t-num">1,567,050 ~ 1,685,000</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-num" data-label="현재가/등락">1,662,000 <span style="color:var(--good)">+1.03%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 28.8</td>
+      <td class="t-num" data-label="매수가">1,545,660 ~ 1,662,000</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>카카오</strong><br><span class="t-ticker">035720.KS</span></td>
-      <td class="t-num">38,250<br><span style="color:var(--critical)">-3.89%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 18.1</td>
-      <td class="t-num">35,572.50 ~ 38,250</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>STX그린로지스</strong><br><span class="t-ticker">465770.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">3,670 <span style="color:var(--good)">+29.91%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 40</td>
+      <td class="t-num" data-label="매수가">3,413.10 ~ 3,670</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>현대차</strong><br><span class="t-ticker">005380.KS</span></td>
-      <td class="t-num">438,750<br><span style="color:var(--critical)">-3.36%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 20.5</td>
-      <td class="t-num">408,037.50 ~ 438,750</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>TIGER 코스닥150</strong><br><span class="t-ticker">232080.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">14,515 <span style="color:var(--critical)">-4.06%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 30.6</td>
+      <td class="t-num" data-label="매수가">13,498.95 ~ 14,515</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>LG화학</strong><br><span class="t-ticker">051910.KS</span></td>
-      <td class="t-num">273,500<br><span style="color:var(--critical)">-2.67%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 29.7</td>
-      <td class="t-num">254,355 ~ 273,500</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>한온시스템</strong><br><span class="t-ticker">018880.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">3,655 <span style="color:var(--critical)">-4.32%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 25.2</td>
+      <td class="t-num" data-label="매수가">3,399.15 ~ 3,655</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>에코프로비엠</strong><br><span class="t-ticker">247540.KQ</span></td>
-      <td class="t-num">110,900<br><span style="color:var(--critical)">-5.05%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 9.9</td>
-      <td class="t-num">103,137 ~ 110,900</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>대우건설</strong><br><span class="t-ticker">047040.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">17,170 <span style="color:var(--critical)">-4.66%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 10.7</td>
+      <td class="t-num" data-label="매수가">15,968.10 ~ 17,170</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>에코프로</strong><br><span class="t-ticker">086520.KQ</span></td>
-      <td class="t-num">89,300<br><span style="color:var(--critical)">-4.59%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 100 / 리버모어 10.8</td>
-      <td class="t-num">83,049 ~ 89,300</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>LG디스플레이</strong><br><span class="t-ticker">034220.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">9,780 <span style="color:var(--critical)">-4.77%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 15.9</td>
+      <td class="t-num" data-label="매수가">9,095.40 ~ 9,780</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>삼성SDI</strong><br><span class="t-ticker">006400.KS</span></td>
-      <td class="t-num">500,000<br><span style="color:var(--critical)">-2.91%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 92.4 / 리버모어 37.2</td>
-      <td class="t-num">465,000 ~ 500,000</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+      <td class="t-name"><strong>삼성중공업</strong><br><span class="t-ticker">010140.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">21,250 <span style="color:var(--critical)">-4.71%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 22.7</td>
+      <td class="t-num" data-label="매수가">19,762.50 ~ 21,250</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>NAVER</strong><br><span class="t-ticker">035420.KS</span></td>
-      <td class="t-num">218,000<br><span style="color:var(--critical)">-3.96%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 84.9 / 리버모어 38.1</td>
-      <td class="t-num">202,740 ~ 218,000</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
-    </tr>
-    <tr>
-      <td class="t-name"><strong>삼성전자</strong><br><span class="t-ticker">005930.KS</span></td>
-      <td class="t-num">272,500<br><span style="color:var(--critical)">-0.18%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 81.6 / 리버모어 47</td>
-      <td class="t-num">253,425 ~ 272,500</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
-    </tr>
-    <tr>
-      <td class="t-name"><strong>신한지주</strong><br><span class="t-ticker">055550.KS</span></td>
-      <td class="t-num">105,900<br><span style="color:var(--critical)">-1.21%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 19.5 / 리버모어 69.8</td>
-      <td class="t-num">102,723 ~ 106,959</td>
-      <td class="t-num">124,962</td>
-      <td class="t-num">97,428</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
-    </tr>
-    <tr>
-      <td class="t-name"><strong>삼성바이오로직스</strong><br><span class="t-ticker">207940.KS</span></td>
-      <td class="t-num">1,529,000<br><span style="color:var(--critical)">-1.35%</span></td>
-      <td class="t-style">버핏형 (가치·안전마진)</td>
-      <td class="t-score">버핏 69 / 리버모어 49.7</td>
-      <td class="t-num">1,421,970 ~ 1,529,000</td>
-      <td class="t-num">장기보유(목표가 없음)</td>
-      <td class="t-num">가격기준 손절 없음</td>
-      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
-    </tr>
-    <tr>
-      <td class="t-name"><strong>KB금융</strong><br><span class="t-ticker">105560.KS</span></td>
-      <td class="t-num">167,000<br><span style="color:var(--critical)">-0.83%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 42.3 / 리버모어 61.4</td>
-      <td class="t-num">160,320 ~ 167,000</td>
-      <td class="t-num">187,040</td>
-      <td class="t-num">155,310</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
-    </tr>
-    <tr>
-      <td class="t-name"><strong>셀트리온</strong><br><span class="t-ticker">068270.KS</span></td>
-      <td class="t-num">194,700<br><span style="color:var(--critical)">-3.37%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 55.8 / 리버모어 50.9</td>
-      <td class="t-num">186,912 ~ 194,700</td>
-      <td class="t-num">218,064</td>
-      <td class="t-num">181,071</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>대영포장</strong><br><span class="t-ticker">014160.KS</span></td>
+      <td class="t-num" data-label="현재가/등락">780 <span style="color:var(--good)">+10.64%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 40</td>
+      <td class="t-num" data-label="매수가">725.40 ~ 780</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr></tbody>
         </table>
       </div>
+      <p class="card-subtitle" style="margin-top:8px">전체 83종목을 버핏·리버모어 스코어로 스크리닝한 뒤, 스코어 상위 20종목만 표시합니다.</p>
     </section>
   
     <section class="card">
@@ -392,154 +534,215 @@
           </thead>
           <tbody>
     <tr>
-      <td class="t-name"><strong>JPMorgan Chase</strong><br><span class="t-ticker">JPM</span></td>
-      <td class="t-num">360.96<br><span style="color:var(--critical)">-0.45%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 31.1 / 리버모어 77.3</td>
-      <td class="t-num">350.13 ~ 364.57</td>
-      <td class="t-num">425.93</td>
-      <td class="t-num">332.08</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Space Exploration Technologies </strong><br><span class="t-ticker">SPCX</span></td>
+      <td class="t-num" data-label="현재가/등락">146.23 <span style="color:var(--good)">+0.23%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 38.2</td>
+      <td class="t-num" data-label="매수가">135.99 ~ 146.23</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Johnson &amp; Johnson</strong><br><span class="t-ticker">JNJ</span></td>
-      <td class="t-num">262.37<br><span style="color:var(--good)">+0.70%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 6.9 / 리버모어 75.9</td>
-      <td class="t-num">254.50 ~ 264.99</td>
-      <td class="t-num">309.60</td>
-      <td class="t-num">241.38</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Ondas Inc</strong><br><span class="t-ticker">ONDS</span></td>
+      <td class="t-num" data-label="현재가/등락">9 <span style="color:var(--good)">+0.33%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 31.3</td>
+      <td class="t-num" data-label="매수가">8.37 ~ 9</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>NVIDIA</strong><br><span class="t-ticker">NVDA</span></td>
-      <td class="t-num">225.01<br><span style="color:var(--good)">+0.13%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 7.4 / 리버모어 74.4</td>
-      <td class="t-num">218.26 ~ 227.26</td>
-      <td class="t-num">265.51</td>
-      <td class="t-num">207.01</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Snap Inc.</strong><br><span class="t-ticker">SNAP</span></td>
+      <td class="t-num" data-label="현재가/등락">5.18 <span style="color:var(--good)">+0.00%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 27</td>
+      <td class="t-num" data-label="매수가">4.82 ~ 5.18</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Coca-Cola</strong><br><span class="t-ticker">KO</span></td>
-      <td class="t-num">86.98<br><span style="color:var(--critical)">-0.82%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 13.9 / 리버모어 73.2</td>
-      <td class="t-num">84.37 ~ 87.85</td>
-      <td class="t-num">102.64</td>
-      <td class="t-num">80.02</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Plug Power, Inc.</strong><br><span class="t-ticker">PLUG</span></td>
+      <td class="t-num" data-label="현재가/등락">2.28 <span style="color:var(--good)">+1.33%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 22.7</td>
+      <td class="t-num" data-label="매수가">2.12 ~ 2.28</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Exxon Mobil</strong><br><span class="t-ticker">XOM</span></td>
-      <td class="t-num">161.46<br><span style="color:var(--good)">+0.79%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 31.5 / 리버모어 71.4</td>
-      <td class="t-num">156.62 ~ 163.07</td>
-      <td class="t-num">190.52</td>
-      <td class="t-num">148.54</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>MARA Holdings, Inc.</strong><br><span class="t-ticker">MARA</span></td>
+      <td class="t-num" data-label="현재가/등락">9.71 <span style="color:var(--critical)">-0.15%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 19.7</td>
+      <td class="t-num" data-label="매수가">9.03 ~ 9.71</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Berkshire Hathaway</strong><br><span class="t-ticker">BRK-B</span></td>
-      <td class="t-num">498.23<br><span style="color:var(--critical)">-1.28%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 45.6 / 리버모어 68.7</td>
-      <td class="t-num">483.28 ~ 503.21</td>
-      <td class="t-num">587.91</td>
-      <td class="t-num">458.37</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Opendoor Technologies Inc</strong><br><span class="t-ticker">OPEN</span></td>
+      <td class="t-num" data-label="현재가/등락">3.54 <span style="color:var(--good)">+0.28%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 20.6</td>
+      <td class="t-num" data-label="매수가">3.29 ~ 3.54</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Amazon</strong><br><span class="t-ticker">AMZN</span></td>
-      <td class="t-num">261.31<br><span style="color:var(--critical)">-0.71%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 31.2 / 리버모어 67.8</td>
-      <td class="t-num">253.47 ~ 263.92</td>
-      <td class="t-num">308.35</td>
-      <td class="t-num">240.41</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Rivian Automotive, Inc.</strong><br><span class="t-ticker">RIVN</span></td>
+      <td class="t-num" data-label="현재가/등락">14.87 <span style="color:var(--critical)">-0.20%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 38.2</td>
+      <td class="t-num" data-label="매수가">13.83 ~ 14.87</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Apple</strong><br><span class="t-ticker">AAPL</span></td>
-      <td class="t-num">305.59<br><span style="color:var(--critical)">-0.06%</span></td>
-      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
-      <td class="t-score">버핏 17 / 리버모어 66.3</td>
-      <td class="t-num">296.42 ~ 308.65</td>
-      <td class="t-num">360.60</td>
-      <td class="t-num">281.14</td>
-      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+      <td class="t-name"><strong>Keel Infrastructure Corp.</strong><br><span class="t-ticker">KEEL</span></td>
+      <td class="t-num" data-label="현재가/등락">3.77 <span style="color:var(--critical)">-1.55%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 18.3</td>
+      <td class="t-num" data-label="매수가">3.51 ~ 3.77</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Procter &amp; Gamble</strong><br><span class="t-ticker">PG</span></td>
-      <td class="t-num">143.12<br><span style="color:var(--critical)">-0.94%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 37.9 / 리버모어 60.8</td>
-      <td class="t-num">137.40 ~ 143.12</td>
-      <td class="t-num">160.29</td>
-      <td class="t-num">133.10</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>SoundHound AI, Inc.</strong><br><span class="t-ticker">SOUN</span></td>
+      <td class="t-num" data-label="현재가/등락">7.04 <span style="color:var(--good)">+0.14%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 20.3</td>
+      <td class="t-num" data-label="매수가">6.55 ~ 7.04</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Alphabet</strong><br><span class="t-ticker">GOOGL</span></td>
-      <td class="t-num">344<br><span style="color:var(--critical)">-0.94%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 49 / 리버모어 59.2</td>
-      <td class="t-num">330.24 ~ 344</td>
-      <td class="t-num">385.28</td>
-      <td class="t-num">319.92</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>Archer Aviation Inc.</strong><br><span class="t-ticker">ACHR</span></td>
+      <td class="t-num" data-label="현재가/등락">6.39 <span style="color:var(--good)">+0.63%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 21.3</td>
+      <td class="t-num" data-label="매수가">5.94 ~ 6.39</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Microsoft</strong><br><span class="t-ticker">MSFT</span></td>
-      <td class="t-num">480.35<br><span style="color:var(--critical)">-3.01%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 24.7 / 리버모어 58</td>
-      <td class="t-num">461.14 ~ 480.35</td>
-      <td class="t-num">537.99</td>
-      <td class="t-num">446.73</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>BitMine Immersion Technologies,</strong><br><span class="t-ticker">BMNR</span></td>
+      <td class="t-num" data-label="현재가/등락">18.73 <span style="color:var(--critical)">-0.36%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 19.3</td>
+      <td class="t-num" data-label="매수가">17.42 ~ 18.73</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Meta Platforms</strong><br><span class="t-ticker">META</span></td>
-      <td class="t-num">568.97<br><span style="color:var(--critical)">-3.61%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 57.7 / 리버모어 39.1</td>
-      <td class="t-num">546.21 ~ 568.97</td>
-      <td class="t-num">637.25</td>
-      <td class="t-num">529.14</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>Cipher Digital Inc.</strong><br><span class="t-ticker">CIFR</span></td>
+      <td class="t-num" data-label="현재가/등락">18.50 <span style="color:var(--good)">+0.05%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 33.8</td>
+      <td class="t-num" data-label="매수가">17.21 ~ 18.50</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Broadcom</strong><br><span class="t-ticker">AVGO</span></td>
-      <td class="t-num">392.43<br><span style="color:var(--critical)">-0.28%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 31 / 리버모어 54.6</td>
-      <td class="t-num">376.73 ~ 392.43</td>
-      <td class="t-num">439.52</td>
-      <td class="t-num">364.96</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>Stellantis N.V.</strong><br><span class="t-ticker">STLA</span></td>
+      <td class="t-num" data-label="현재가/등락">5.12 <span style="color:var(--critical)">-0.39%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 19.2</td>
+      <td class="t-num" data-label="매수가">4.76 ~ 5.12</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr>
     <tr>
-      <td class="t-name"><strong>Tesla</strong><br><span class="t-ticker">TSLA</span></td>
-      <td class="t-num">339.30<br><span style="color:var(--critical)">-0.69%</span></td>
-      <td class="t-style">혼합형 (가치+모멘텀)</td>
-      <td class="t-score">버핏 48 / 리버모어 40.2</td>
-      <td class="t-num">325.73 ~ 339.30</td>
-      <td class="t-num">380.02</td>
-      <td class="t-num">315.55</td>
-      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+      <td class="t-name"><strong>TeraWulf Inc.</strong><br><span class="t-ticker">WULF</span></td>
+      <td class="t-num" data-label="현재가/등락">17.60 <span style="color:var(--critical)">-1.12%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 28.6</td>
+      <td class="t-num" data-label="매수가">16.37 ~ 17.60</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Fermi Inc.</strong><br><span class="t-ticker">FRMI</span></td>
+      <td class="t-num" data-label="현재가/등락">6.14 <span style="color:var(--critical)">-0.65%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 18.7</td>
+      <td class="t-num" data-label="매수가">5.71 ~ 6.14</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>NuScale Power Corporation</strong><br><span class="t-ticker">SMR</span></td>
+      <td class="t-num" data-label="현재가/등락">9.19 <span style="color:var(--critical)">-0.11%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 19.8</td>
+      <td class="t-num" data-label="매수가">8.55 ~ 9.19</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Strategy Inc</strong><br><span class="t-ticker">MSTR</span></td>
+      <td class="t-num" data-label="현재가/등락">97.68 <span style="color:var(--critical)">-0.22%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 19.6</td>
+      <td class="t-num" data-label="매수가">90.84 ~ 97.68</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Intuitive Machines, Inc.</strong><br><span class="t-ticker">LUNR</span></td>
+      <td class="t-num" data-label="현재가/등락">20.38 <span style="color:var(--critical)">-0.88%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 18.2</td>
+      <td class="t-num" data-label="매수가">18.95 ~ 20.38</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>CleanSpark, Inc.</strong><br><span class="t-ticker">CLSK</span></td>
+      <td class="t-num" data-label="현재가/등락">12.40 <span style="color:var(--critical)">-0.08%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 22.8</td>
+      <td class="t-num" data-label="매수가">11.53 ~ 12.40</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Rocket Lab Corporation</strong><br><span class="t-ticker">RKLB</span></td>
+      <td class="t-num" data-label="현재가/등락">82.08 <span style="color:var(--critical)">-0.50%</span></td>
+      <td data-label="매매 스타일"><span class="style-pill style-value">버핏형 (가치·안전마진)</span></td>
+      <td class="t-score" data-label="스코어">버핏 100 · 리버모어 24.3</td>
+      <td class="t-num" data-label="매수가">76.33 ~ 82.08</td>
+      <td class="t-num" data-label="목표가">장기보유(목표가 없음)</td>
+      <td class="t-num" data-label="손절가">가격기준 손절 없음</td>
+      <td class="t-note" data-label="전략 메모">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
     </tr></tbody>
         </table>
       </div>
+      <p class="card-subtitle" style="margin-top:8px">전체 100종목을 버핏·리버모어 스코어로 스크리닝한 뒤, 스코어 상위 20종목만 표시합니다.</p>
     </section>
   
     <section class="card">
       <h2>달리오 스타일 포트폴리오 배분 제안</h2>
       <p class="card-subtitle">올웨더(All Weather) 포트폴리오를 현재 공포탐욕 국면에 맞춰 리밸런싱한 참고안입니다.</p>
-      <div class="alloc-list"><div class="alloc-item"><div class="alloc-bar" style="width:31.9%"></div><span class="alloc-label">주식(국내+해외)</span><span class="alloc-pct">31.9%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:41.0%"></div><span class="alloc-label">장기채권</span><span class="alloc-pct">41%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:15.4%"></div><span class="alloc-label">중기채권</span><span class="alloc-pct">15.4%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:6.7%"></div><span class="alloc-label">금</span><span class="alloc-pct">6.7%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:5.0%"></div><span class="alloc-label">원자재/현금</span><span class="alloc-pct">5%</span></div></div>
-      <p class="fg-insight">💡 현재 F&amp;G 43.6점 국면 기준 기본 올웨더(30/40/15/7.5/7.5) 대비 주식 비중을 +1.9%p 틸트했습니다.</p>
+      <div class="alloc-list"><div class="alloc-item"><div class="alloc-bar" style="width:32.3%; background:#2a78d6"></div><span class="alloc-label">주식(국내+해외)</span><span class="alloc-pct">32.3%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:41.1%; background:#1baf7a"></div><span class="alloc-label">장기채권</span><span class="alloc-pct">41.1%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:15.5%; background:#eda100"></div><span class="alloc-label">중기채권</span><span class="alloc-pct">15.5%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:6.6%; background:#4a3aa7"></div><span class="alloc-label">금</span><span class="alloc-pct">6.6%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:4.5%; background:#e87ba4"></div><span class="alloc-label">원자재/현금</span><span class="alloc-pct">4.5%</span></div></div>
+      <p class="fg-insight">💡 현재 F&amp;G 42.2점 국면 기준 기본 올웨더(30/40/15/7.5/7.5) 대비 주식 비중을 +2.3%p 틸트했습니다.</p>
     </section>
   
     <section class="card">
