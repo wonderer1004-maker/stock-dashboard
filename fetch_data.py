@@ -286,11 +286,8 @@ def main():
     with open("universe.json", encoding="utf-8") as f:
         universe = json.load(f)
 
-    log("한국 거래대금 상위 종목(코스피50+코스닥50) 자동 수집 중...")
-    kr_dynamic = (
-        safe(lambda: fetch_kr_top_by_value(0, "코스피", 50), default=[], label="kr_top_kospi")
-        + safe(lambda: fetch_kr_top_by_value(1, "코스닥", 50), default=[], label="kr_top_kosdaq")
-    )
+          log("한국 거래대금 상위 종목(코스피 100, 코스닥 제외) 자동 수집 중...")
+    kr_dynamic = safe(lambda: fetch_kr_top_by_value(0, "코스피", 100), default=[], label="kr_top_kospi")
     if len(kr_dynamic) < 20:
         log("WARN: 거래대금 상위 수집 실패/부족 -> universe.json 고정 리스트로 대체")
         kr_list, kr_dynamic_ok = universe["kr"], False
