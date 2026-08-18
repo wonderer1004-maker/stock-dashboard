@@ -23,6 +23,21 @@ import yfinance as yf
 KST = timezone(timedelta(hours=9))
 HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; StockDashboardBot/1.0)"}
 
+# 레버리지/인버스 상품 탐지용 (종목명 기반). 이런 상품은 일간 재조정(decay) 구조상
+# PER/52주 고점 기반의 버핏·리버모어 스코어링이 무의미하고, 장기투자 철학과도 맞지 않아
+# 대시보드의 "종목 추천" 목록에서 제외한다.
+LEV_INV_RE = re.compile(
+    r"(레버리지|인버스|inverse|leveraged|ultra(pro)?|\bbull\s?[23]?x?\b|\bbear\s?[23]?x?\b|\b[23]x\b|\bshort\b)",
+    re.IGNORECASE,
+)
+
+
+def classify_asset(name, quote_type):
+    """종목명 + yfinance quoteType으로 (자산유형, 레버리지/인버스 여부) 판별."""
+    is_etf = str(quote_type or "").upper() in ("ETF", "MUTUALFUND")
+    is_lev_inv = bool(LEV_INV_RE.search(name or ""))
+    return ("ETF" if is_etf else "STOCK"), is_lev_inv
+
 
 def log(msg):
     print(f"[fetch_data] {msg}", flush=True)
@@ -152,14 +167,18 @@ def fetch_stock(ticker, name):
 
         per = None
         market_cap = None
+        quote_type = None
         try:
             slow = t.info
             per = slow.get("trailingPE")
             mc = slow.get("marketCap")
+            quote_type = slow.get("quoteType")
             if mc:
                 market_cap = f"{mc/1e12:.2f}조" if mc >= 1e12 else f"{mc/1e8:.0f}억"
         except Exception:
             pass
+
+        asset_type, is_lev_inv = classify_asset(name, quote_type)
 
         return {
             "ticker": ticker, "name": name,
@@ -167,6 +186,8 @@ def fetch_stock(ticker, name):
             "per": round(per, 2) if per else None,
             "w52_high": round(w52_high, 2), "w52_low": round(w52_low, 2),
             "market_cap": market_cap,
+            "asset_type": asset_type,               # "STOCK" | "ETF"
+            "is_leveraged_inverse": is_lev_inv,      # True면 대시보드 추천에서 제외
         }
     except Exception as e:
         log(f"WARN stock {ticker}: {e}")
