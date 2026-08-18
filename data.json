@@ -1,145 +1,363 @@
 {
-  "generated_at": "2026-08-18T10:29:03.117863+09:00",
-  "generated_at_label": "2026-08-18 10:29 KST",
-  "data_asof_note": "미국 지표는 2026-08-14(금) 종가, 한국 지표는 조회 시점(2026-08-14~18) 기준 실측치입니다. 출처가 다른 시점을 섞어 보여줄 수 있으니 각 카드의 시각을 확인하세요.",
+  "generated_at": "2026-08-18T13:35:03.764306+09:00",
+  "generated_at_label": "2026-08-18 13:35 KST",
+  "data_asof_note": "미국 지표는 CNN/야후파이낸스 최신 종가, 한국 지표는 야후파이낸스 최신 데이터 기준입니다. V-KOSPI는 실측치가 아닌 실현변동성 대체 지표입니다.",
   "us_fear_greed": {
-    "score": 64.97,
-    "prev_close": 66.14,
+    "score": 59.94,
+    "prev_close": 59.97,
     "rating_en": "Greed",
     "rating_kr": "탐욕",
-    "asof": "2026-08-14",
+    "asof": "2026-08-18",
     "source_url": "https://edition.cnn.com/markets/fear-and-greed",
     "components": [
       {
         "name": "시장 모멘텀 (S&P500 vs 125일 이평)",
-        "score": 74.6,
-        "rating": "Extreme Greed"
+        "score": 7745.1,
+        "rating": "greed"
+      },
+      {
+        "name": "시장 모멘텀 (S&P500 vs 125일 이평, 보조)",
+        "score": 7211.4,
+        "rating": "greed"
       },
       {
         "name": "주가 강도 (52주 신고가/신저가 비율)",
-        "score": 28.6,
-        "rating": "Fear"
+        "score": 0.6,
+        "rating": "fear"
+      },
+      {
+        "name": "주가 폭 (상승/하락 거래량)",
+        "score": 1060.4,
+        "rating": "greed"
+      },
+      {
+        "name": "풋/콜 옵션 비율",
+        "score": 0.7,
+        "rating": "greed"
+      },
+      {
+        "name": "시장 변동성 (VIX vs 50일 이평)",
+        "score": 17.2,
+        "rating": "neutral"
+      },
+      {
+        "name": "정크본드 수요",
+        "score": 1.2,
+        "rating": "extreme greed"
+      },
+      {
+        "name": "안전자산 수요",
+        "score": 3.7,
+        "rating": "greed"
       }
     ],
-    "insight": "지수 모멘텀은 극단적 탐욕이지만 개별 종목 강도는 공포 영역 -- 소수 대형주가 지수를 끌어올리는 '쏠림 장세' 신호일 수 있습니다."
+    "insight": null
   },
   "indices": {
     "kospi": {
-      "value": 6977.94,
-      "change_pct": 2.42,
-      "w52_high": 9385.59,
-      "w52_low": 3079.27,
-      "volume": 332942000,
-      "asof": "2026-08-14"
+      "value": 6942.46,
+      "change_pct": -0.51,
+      "w52_high": 9114.55,
+      "w52_low": 3130.09,
+      "volume": 280848,
+      "asof": "2026-08-18"
     },
     "kosdaq": {
-      "value": 864.39,
-      "change_pct": -0.03,
-      "asof": "조회시점(실시간)"
+      "value": 846.6,
+      "change_pct": -2.09,
+      "w52_high": 1226.18,
+      "w52_low": 644.78,
+      "volume": 511917,
+      "asof": "2026-08-18"
     },
     "usdkrw": {
-      "value": 1411.6,
-      "change_pct": -0.35,
-      "asof": "조회시점(실시간)"
+      "value": 1412.18,
+      "change_pct": -0.23,
+      "w52_high": 1554.48,
+      "w52_low": 1377.64,
+      "volume": 0,
+      "asof": "2026-08-18"
     },
     "vkospi": {
-      "value": 55.31,
-      "change": 0.05,
-      "asof": "2026-08-14"
+      "value": 87.6,
+      "change": 0,
+      "asof": "2026-08-18",
+      "note": "V-KOSPI 실측치 대신 20일 실현변동성(연율화, %)을 사용"
     }
   },
   "kr_stocks": [
     {
       "ticker": "005930.KS",
       "name": "삼성전자",
-      "price": 42000,
-      "change_pct": -0.36,
+      "price": 272500.0,
+      "change_pct": -0.18,
       "per": null,
-      "w52_high": 54140,
-      "w52_low": 36850,
-      "market_cap": "279.45조원"
+      "w52_high": 374500.0,
+      "w52_low": 67500.0,
+      "market_cap": "1786.11조"
     },
     {
       "ticker": "000660.KS",
       "name": "SK하이닉스",
-      "price": 1762000,
-      "change_pct": 0.17,
-      "per": 16.65,
-      "w52_high": 2987000,
-      "w52_low": 245000,
-      "market_cap": "1,250.76조원"
+      "price": 1685000.0,
+      "change_pct": 2.03,
+      "per": null,
+      "w52_high": 2987000.0,
+      "w52_low": 245000.0,
+      "market_cap": "1196.11조"
     },
     {
       "ticker": "035420.KS",
       "name": "NAVER",
-      "price": 267000,
-      "change_pct": -2.73,
-      "per": 19.34,
-      "w52_high": 295000,
-      "w52_low": 171500,
-      "market_cap": "39.87조원"
+      "price": 218000.0,
+      "change_pct": -3.96,
+      "per": null,
+      "w52_high": 304000.0,
+      "w52_low": 181100.0,
+      "market_cap": "32.61조"
     },
     {
       "ticker": "035720.KS",
       "name": "카카오",
-      "price": 38300,
-      "change_pct": 0.39,
-      "per": 32.21,
-      "w52_high": 69700,
-      "w52_low": 32250,
-      "market_cap": "16.88조원"
+      "price": 38250.0,
+      "change_pct": -3.89,
+      "per": null,
+      "w52_high": 69700.0,
+      "w52_low": 32250.0,
+      "market_cap": "16.86조"
+    },
+    {
+      "ticker": "005380.KS",
+      "name": "현대차",
+      "price": 438750.0,
+      "change_pct": -3.36,
+      "per": null,
+      "w52_high": 783000.0,
+      "w52_low": 213000.0,
+      "market_cap": "114.88조"
+    },
+    {
+      "ticker": "051910.KS",
+      "name": "LG화학",
+      "price": 273500.0,
+      "change_pct": -2.67,
+      "per": null,
+      "w52_high": 437500.0,
+      "w52_low": 224000.0,
+      "market_cap": "21.41조"
+    },
+    {
+      "ticker": "068270.KS",
+      "name": "셀트리온",
+      "price": 194700.0,
+      "change_pct": -3.37,
+      "per": null,
+      "w52_high": 239047.62,
+      "w52_low": 158500.0,
+      "market_cap": "44.65조"
+    },
+    {
+      "ticker": "207940.KS",
+      "name": "삼성바이오로직스",
+      "price": 1529000.0,
+      "change_pct": -1.35,
+      "per": null,
+      "w52_high": 1987000.0,
+      "w52_low": 1228000.0,
+      "market_cap": "70.78조"
+    },
+    {
+      "ticker": "006400.KS",
+      "name": "삼성SDI",
+      "price": 500000.0,
+      "change_pct": -2.91,
+      "per": null,
+      "w52_high": 723000.0,
+      "w52_low": 196800.0,
+      "market_cap": "39.35조"
+    },
+    {
+      "ticker": "105560.KS",
+      "name": "KB금융",
+      "price": 167000.0,
+      "change_pct": -0.83,
+      "per": null,
+      "w52_high": 194500.0,
+      "w52_low": 105800.0,
+      "market_cap": "58.63조"
+    },
+    {
+      "ticker": "055550.KS",
+      "name": "신한지주",
+      "price": 105900.0,
+      "change_pct": -1.21,
+      "per": null,
+      "w52_high": 113300.0,
+      "w52_low": 63600.0,
+      "market_cap": "49.86조"
+    },
+    {
+      "ticker": "247540.KQ",
+      "name": "에코프로비엠",
+      "price": 110900.0,
+      "change_pct": -5.05,
+      "per": null,
+      "w52_high": 260000.0,
+      "w52_low": 88300.0,
+      "market_cap": "10.85조"
+    },
+    {
+      "ticker": "086520.KQ",
+      "name": "에코프로",
+      "price": 89300.0,
+      "change_pct": -4.59,
+      "per": null,
+      "w52_high": 190000.0,
+      "w52_low": 45550.0,
+      "market_cap": "12.09조"
     }
   ],
   "us_stocks": [
     {
       "ticker": "AAPL",
       "name": "Apple",
-      "price": 303.88,
-      "change_pct": -0.67,
-      "per": 34.85,
+      "price": 305.59,
+      "change_pct": -0.06,
+      "per": 35.04,
       "w52_high": 344.57,
       "w52_low": 223.78,
-      "market_cap": "4.44조달러"
+      "market_cap": "4.46조"
     },
     {
       "ticker": "MSFT",
       "name": "Microsoft",
-      "price": 495.4,
-      "change_pct": -0.3,
-      "per": 27.63,
+      "price": 480.35,
+      "change_pct": -3.01,
+      "per": 27.62,
       "w52_high": 553.72,
       "w52_low": 349.2,
-      "market_cap": "3.68조달러"
+      "market_cap": "3.57조"
     },
     {
       "ticker": "GOOGL",
       "name": "Alphabet",
-      "price": 343.61,
-      "change_pct": -0.66,
-      "per": 17.25,
+      "price": 344.0,
+      "change_pct": -0.94,
+      "per": 17.36,
       "w52_high": 408.61,
       "w52_low": 196.6,
-      "market_cap": "4.20조달러"
+      "market_cap": "4.21조"
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon",
+      "price": 261.31,
+      "change_pct": -0.71,
+      "per": 21.14,
+      "w52_high": 287.2,
+      "w52_low": 196.0,
+      "market_cap": "2.82조"
     },
     {
       "ticker": "NVDA",
       "name": "NVIDIA",
-      "price": 225.16,
-      "change_pct": -0.06,
-      "per": 34.48,
+      "price": 225.01,
+      "change_pct": 0.13,
+      "per": 34.46,
       "w52_high": 236.54,
       "w52_low": 164.07,
-      "market_cap": "5.45조달러"
+      "market_cap": "5.45조"
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms",
+      "price": 568.97,
+      "change_pct": -3.61,
+      "per": 22.23,
+      "w52_high": 790.8,
+      "w52_low": 520.26,
+      "market_cap": "1.45조"
     },
     {
       "ticker": "BRK-B",
       "name": "Berkshire Hathaway",
-      "price": 504.03,
-      "change_pct": -0.57,
+      "price": 498.23,
+      "change_pct": -1.28,
       "per": 12.67,
       "w52_high": 537.74,
       "w52_low": 464.01,
-      "market_cap": "1.08조달러"
+      "market_cap": "1.07조"
+    },
+    {
+      "ticker": "JPM",
+      "name": "JPMorgan Chase",
+      "price": 360.96,
+      "change_pct": -0.45,
+      "per": 15.55,
+      "w52_high": 366.5,
+      "w52_low": 279.1,
+      "market_cap": "9595억"
+    },
+    {
+      "ticker": "JNJ",
+      "name": "Johnson & Johnson",
+      "price": 262.37,
+      "change_pct": 0.7,
+      "per": 30.23,
+      "w52_high": 274.9,
+      "w52_low": 173.33,
+      "market_cap": "6323억"
+    },
+    {
+      "ticker": "KO",
+      "name": "Coca-Cola",
+      "price": 86.98,
+      "change_pct": -0.82,
+      "per": 26.28,
+      "w52_high": 90.92,
+      "w52_low": 65.35,
+      "market_cap": "3742억"
+    },
+    {
+      "ticker": "PG",
+      "name": "Procter & Gamble",
+      "price": 143.12,
+      "change_pct": -0.94,
+      "per": 21.85,
+      "w52_high": 167.25,
+      "w52_low": 137.62,
+      "market_cap": "3327억"
+    },
+    {
+      "ticker": "XOM",
+      "name": "Exxon Mobil",
+      "price": 161.46,
+      "change_pct": 0.79,
+      "per": 20.62,
+      "w52_high": 176.41,
+      "w52_low": 106.15,
+      "market_cap": "6639억"
+    },
+    {
+      "ticker": "TSLA",
+      "name": "Tesla",
+      "price": 339.3,
+      "change_pct": -0.69,
+      "per": 311.28,
+      "w52_high": 498.83,
+      "w52_low": 297.38,
+      "market_cap": "1.34조"
+    },
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom",
+      "price": 392.43,
+      "change_pct": -0.28,
+      "per": 65.41,
+      "w52_high": 495.0,
+      "w52_low": 281.87,
+      "market_cap": "1.87조"
     }
-  ]
+  ],
+  "_vol_score_override": 4.1
 }
