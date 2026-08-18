@@ -58,50 +58,111 @@ def kospi_fear_greed(components: list[dict]) -> dict:
     }
 
 
-def buffett_score(stock: dict) -> float:
+def _percentile_ranks(stocks, getter, ascending=True):
     """
-    가치/퀄리티 스코어 (0-100).
-    - PER 낮을수록 가점 (PER 5 -> 100, PER 30 이상 -> 0)
-    - 52주 고점 대비 하락폭(안전마진) 클수록 가점 (33% 이상 하락 -> 100)
+    getter(stock) -> 값(없으면 None). ascending=True면 값이 작을수록 좋음(예: PER, 부채비율).
+    반환: ({index: percentile 0~100(높을수록 좋음)}, 데이터 커버리지 비율 0~1).
+
+    절대 임계값(예: "PER 5 이하면 100점, 30 이상이면 0점")을 쓰지 않고 같은 유니버스
+    안에서의 상대 순위를 쓰는 이유: 시장/업종/시기에 따라 PER·PBR 같은 지표의 절대 수준이
+    크게 달라서, 고정 임계값은 성장주를 부당하게 낮게 평가하거나 부실기업을 부당하게
+    높게 평가하는 왜곡이 생기기 쉽다. 팩터투자(가치·퀄리티·모멘텀 팩터)에서 표준적으로
+    쓰이는 방식이 바로 유니버스 내 상대순위(cross-sectional rank)다.
     """
-    per = stock.get("per")
-    pct_from_high = stock.get("pct_from_52w_high")  # 음수(예: -18.4)
+    pairs = [(i, getter(s)) for i, s in enumerate(stocks)]
+    valid = [(i, v) for i, v in pairs if v is not None]
+    coverage = len(valid) / len(stocks) if stocks else 0.0
+    ranks = {}
+    if len(valid) >= 2:
+        valid_sorted = sorted(valid, key=lambda t: t[1], reverse=not ascending)
+        vn = len(valid_sorted)
+        for rank, (i, _v) in enumerate(valid_sorted):
+            ranks[i] = 100 * (vn - 1 - rank) / (vn - 1)
+    for i, _v in pairs:
+        ranks.setdefault(i, 50.0)  # 데이터 없으면 중립(50점) 처리
+    return ranks, coverage
 
-    score_per = None
-    if per and per > 0:
-        score_per = clamp(100 - (per - 5) * 4)
 
-    score_mos = None
-    if pct_from_high is not None:
-        score_mos = clamp(abs(min(pct_from_high, 0)) * 3)
-
-    parts = [p for p in (score_per, score_mos) if p is not None]
-    if not parts:
+def _weighted_avg(parts):
+    """parts: [(percentile_value, coverage_weight), ...] -> 커버리지로 가중평균.
+    데이터가 없는 지표는 자동으로 가중치 0이 되어 결측치 때문에 부당하게 낮은/높은
+    점수를 받지 않는다."""
+    total_w = sum(w for _, w in parts)
+    if total_w <= 0:
         return 50.0
-    return round(sum(parts) / len(parts), 1)
+    return sum(v * w for v, w in parts) / total_w
 
 
-def livermore_score(stock: dict) -> float:
+def score_stock_universe(stocks: list[dict]) -> list[dict]:
     """
-    모멘텀/돌파 스코어 (0-100).
-    - 52주 신고가에 근접할수록 가점 (신고가 -> 100)
-    - 최근 등락률(상승 모멘텀)이 강할수록 가점
+    가치(Value)·퀄리티(Quality)·모멘텀(Momentum) 3팩터 방식의 종합 스코어링.
+    (팩터투자에서 표준적으로 쓰이는 프레임워크 — 예: MSCI/iShares 멀티팩터 지수,
+    Fama-French Value/Momentum 팩터, Novy-Marx Quality 팩터를 단순화해 적용)
+
+    - Value 35% : PER·PBR가 유니버스 내에서 낮을수록 유리 (버핏 스타일 저평가)
+    - Quality 35% : ROE·순이익률은 높고 부채비율은 낮을수록 유리 (우량 기업 필터.
+      단순히 싼 것만 보면 '가치 함정(value trap)'에 빠지기 쉬워 퀄리티로 보완)
+    - Momentum 30% : 52주 가격 레인지 내 위치(추세 강도) + 최근 등락률
+      (리버모어/오닐 스타일 추세추종)
+
+    이전 방식(PER<5→100점 같은 고정 임계값 + 두 점수 중 max값 채택)의 문제였던
+    "레버리지·인버스 ETF나 하루 급등 종목이 최상위로 튀는" 왜곡을 상대순위 기반
+    가중합으로 줄인다. 특정 지표가 없는 종목(예: 일부 한국 종목의 ROE 미제공)은
+    남은 지표들로만 재계산되어 결측치 불이익이 없다.
     """
-    pct_from_high = stock.get("pct_from_52w_high")
-    change_pct = stock.get("change_pct", 0)
+    n = len(stocks)
+    if n == 0:
+        return []
 
-    score_prox = clamp(100 - abs(pct_from_high) * 2) if pct_from_high is not None else 50
-    score_chg = clamp(50 + change_pct * 5)
+    per_rank, per_cov = _percentile_ranks(
+        stocks, lambda s: s.get("per") if (s.get("per") and s["per"] > 0) else None, ascending=True)
+    pbr_rank, pbr_cov = _percentile_ranks(
+        stocks, lambda s: s.get("pbr") if (s.get("pbr") and s["pbr"] > 0) else None, ascending=True)
+    roe_rank, roe_cov = _percentile_ranks(stocks, lambda s: s.get("roe"), ascending=False)
+    margin_rank, margin_cov = _percentile_ranks(stocks, lambda s: s.get("profit_margin"), ascending=False)
+    debt_rank, debt_cov = _percentile_ranks(
+        stocks,
+        lambda s: s.get("debt_to_equity") if (s.get("debt_to_equity") is not None and s["debt_to_equity"] >= 0) else None,
+        ascending=True,
+    )
+    chg_rank, chg_cov = _percentile_ranks(stocks, lambda s: s.get("change_pct"), ascending=False)
 
-    return round(score_prox * 0.6 + score_chg * 0.4, 1)
+    results = []
+    for i, s in enumerate(stocks):
+        s = dict(s)
+        price, w_hi, w_lo = s.get("price"), s.get("w52_high"), s.get("w52_low")
+        s["pct_from_52w_high"] = round((price - w_hi) / w_hi * 100, 1) if price and w_hi else None
 
+        if price is not None and w_hi and w_lo and w_hi > w_lo:
+            range_pos = clamp((price - w_lo) / (w_hi - w_lo) * 100)
+        else:
+            range_pos = 50.0
 
-def style_tag(buffett: float, livermore: float) -> str:
-    if livermore >= 65 and livermore - buffett >= 10:
-        return "리버모어형 (모멘텀·돌파)"
-    if buffett >= 65 and buffett - livermore >= 10:
-        return "버핏형 (가치·안전마진)"
-    return "혼합형 (가치+모멘텀)"
+        value = round(_weighted_avg([(per_rank[i], per_cov), (pbr_rank[i], pbr_cov)]), 1)
+        quality = round(_weighted_avg(
+            [(roe_rank[i], roe_cov), (margin_rank[i], margin_cov), (debt_rank[i], debt_cov)]), 1)
+        momentum = round(range_pos * 0.75 + chg_rank[i] * 0.25, 1)
+        composite = round(value * 0.35 + quality * 0.35 + momentum * 0.30, 1)
+
+        fundamentals = (value + quality) / 2
+        if momentum - fundamentals >= 15:
+            style = "리버모어형 (모멘텀·돌파)"
+        elif fundamentals - momentum >= 15:
+            style = "버핏형 (가치·퀄리티)"
+        else:
+            style = "혼합형 (가치+모멘텀)"
+
+        s.update({
+            "value_score": value,
+            "quality_score": quality,
+            "momentum_score": momentum,
+            "composite_score": composite,
+            "style": style,
+        })
+        results.append(s)
+
+    results.sort(key=lambda s: s["composite_score"], reverse=True)
+    return results
 
 
 def trade_levels(stock: dict, style: str) -> dict:
