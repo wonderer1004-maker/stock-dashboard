@@ -307,7 +307,7 @@ def main():
     us_stocks = fetch_universe(us_list)
 
     universe_note = (
-        f"한국: {'거래대금 상위 (코스피 50 + 코스닥 50, 네이버금융 실시간 랭킹)' if kr_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'} · "
+               f"한국: {'코스피 거래대금 상위 100 (코스닥 제외, 네이버금융 실시간 랭킹)' if kr_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'} · "
         f"미국: {'거래대금(거래량) 상위 100종목 (야후파이낸스 스크리너)' if us_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'}"
     )
 
