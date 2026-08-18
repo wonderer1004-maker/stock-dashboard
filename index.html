@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공포탐욕지수 &amp; 대가 매매전략 대시보드</title>
+<style>
+  .viz-root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --gridline: #e1e0d9;
+    --border: rgba(11,11,11,0.10);
+    --good: #0ca30c;
+    --warning: #fab219;
+    --serious: #ec835a;
+    --critical: #d03b3b;
+    --series-blue: #2a78d6;
+    --gauge-track: #e1e0d9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --gridline: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --good: #0ca30c;
+      --warning: #fab219;
+      --serious: #ec835a;
+      --critical: #e66767;
+      --series-blue: #3987e5;
+      --gauge-track: #383835;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .viz-root {
+    display: block;
+    min-height: 100vh;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  header.top { padding: 8px 0 20px; border-bottom: 1px solid var(--gridline); margin-bottom: 20px; }
+  header.top h1 { font-size: 22px; margin: 0 0 6px; }
+  header.top p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 { font-size: 16px; margin: 0 0 4px; }
+  .card-subtitle { color: var(--text-secondary); font-size: 12.5px; margin: 0 0 14px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; } }
+  .fg-body { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .gauge-wrap { text-align: center; min-width: 200px; }
+  .gauge-svg { width: 220px; max-width: 100%; }
+  .gauge-num { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .gauge-label { font-size: 15px; font-weight: 700; margin-top: -8px; }
+  .comp-list { flex: 1; min-width: 220px; }
+  .comp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .comp-name { flex: 0 0 44%; font-size: 12px; color: var(--text-secondary); }
+  .comp-bar-track { flex: 1; height: 8px; border-radius: 4px; background: var(--gridline); overflow: hidden; }
+  .comp-bar-fill { height: 100%; background: var(--series-blue); border-radius: 4px; }
+  .comp-score { flex: 0 0 32px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .fg-insight { font-size: 12.5px; color: var(--text-secondary); margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed var(--gridline); }
+  .fg-source { font-size: 11px; color: var(--text-muted); margin: 6px 0 0; }
+  .idx-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 760px) { .idx-grid { grid-template-columns: repeat(2, 1fr); } }
+  .idx-tile { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .idx-tile .idx-name { font-size: 12px; color: var(--text-secondary); }
+  .idx-tile .idx-val { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .idx-tile .idx-chg { font-size: 12px; font-variant-numeric: tabular-nums; }
+  table.stock-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  .table-wrap { overflow-x: auto; }
+  table.stock-table th {
+    text-align: left; font-weight: 600; color: var(--text-secondary);
+    border-bottom: 1px solid var(--gridline); padding: 8px 10px; white-space: nowrap;
+  }
+  table.stock-table td { padding: 10px; border-bottom: 1px solid var(--gridline); vertical-align: top; }
+  table.stock-table tr:last-child td { border-bottom: none; }
+  .t-ticker { color: var(--text-muted); font-size: 11px; }
+  .t-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .t-note { color: var(--text-secondary); min-width: 220px; }
+  .alloc-list { display: flex; flex-direction: column; gap: 10px; }
+  .alloc-item { position: relative; background: var(--page); border-radius: 8px; height: 34px; overflow: hidden; border: 1px solid var(--border); }
+  .alloc-bar { position: absolute; left: 0; top: 0; bottom: 0; background: var(--series-blue); opacity: .25; }
+  .alloc-label { position: absolute; left: 12px; top: 8px; font-size: 12.5px; font-weight: 600; }
+  .alloc-pct { position: absolute; right: 12px; top: 8px; font-size: 12.5px; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .guru-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 760px) { .guru-grid { grid-template-columns: 1fr; } }
+  .guru-card { background: var(--page); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .guru-card h3 { font-size: 13.5px; margin: 0 0 8px; }
+  .guru-card p { font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+  footer.disclaimer {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.7;
+    border-top: 1px solid var(--gridline); padding-top: 16px; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+  <header class="top">
+    <h1>📊 공포탐욕지수 &amp; 대가 매매전략 대시보드</h1>
+    <p>생성 시각: 2026-08-18 10:29 KST · 미국 지표는 2026-08-14(금) 종가, 한국 지표는 조회 시점(2026-08-14~18) 기준 실측치입니다. 출처가 다른 시점을 섞어 보여줄 수 있으니 각 카드의 시각을 확인하세요.</p>
+  </header>
+
+  <div class="two-col">
+    
+    <section class="card fg-card">
+      <h2>🇺🇸 미국 공포탐욕지수 (CNN)</h2>
+      <p class="card-subtitle">CNN Fear &amp; Greed Index · 2026-08-14 기준</p>
+      <div class="fg-body">
+        <div class="gauge-wrap">
+          
+    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 64.97점">
+      <path d="M 18.0 110.0 A 92.0 92.0 0 1 1 202.0 110.0" fill="none" stroke="var(--gauge-track)" stroke-width="16" stroke-linecap="round"/>
+      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 151.7 28.0" fill="none" stroke="#0ca30c" stroke-width="16" stroke-linecap="round"/>
+      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#0ca30c">64.97</text>
+    </svg>
+          <div class="gauge-label" style="color:#0ca30c">탐욕</div>
+        </div>
+        <div class="comp-list">
+        <div class="comp-row">
+          <span class="comp-name">시장 모멘텀 (S&amp;P500 vs 125일 이평)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:75%"></div></div>
+          <span class="comp-score">74.6</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-name">주가 강도 (52주 신고가/신저가 비율)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:29%"></div></div>
+          <span class="comp-score">28.6</span>
+        </div></div>
+      </div>
+      <p class="fg-insight">💡 지수 모멘텀은 극단적 탐욕이지만 개별 종목 강도는 공포 영역 -- 소수 대형주가 지수를 끌어올리는 &#x27;쏠림 장세&#x27; 신호일 수 있습니다.</p>
+      <p class="fg-source">출처: https://edition.cnn.com/markets/fear-and-greed (전일 종가 66.14)</p>
+    </section>
+    
+    <section class="card fg-card">
+      <h2>🇰🇷 한국 코스피 공포탐욕지수 (자체 산출)</h2>
+      <p class="card-subtitle">CNN 방법론을 한국 시장 데이터로 재구성 (5개 지표)</p>
+      <div class="fg-body">
+        <div class="gauge-wrap">
+          
+    <svg viewBox="0 0 220 136" class="gauge-svg" role="img" aria-label="공포탐욕지수 48.9점">
+      <path d="M 18.0 110.0 A 92.0 92.0 0 1 1 202.0 110.0" fill="none" stroke="var(--gauge-track)" stroke-width="16" stroke-linecap="round"/>
+      <path d="M 18.0 110.0 A 92.0 92.0 0 0 1 106.8 18.1" fill="none" stroke="#898781" stroke-width="16" stroke-linecap="round"/>
+      <text x="110.0" y="104.0" text-anchor="middle" class="gauge-num" fill="#898781">48.9</text>
+    </svg>
+          <div class="gauge-label" style="color:#898781">중립</div>
+        </div>
+        <div class="comp-list">
+        <div class="comp-row">
+          <span class="comp-name">모멘텀 (52주 레인지 위치 + 당일 등락)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:64%"></div></div>
+          <span class="comp-score">64.4</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-name">변동성 (V-KOSPI)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:0%"></div></div>
+          <span class="comp-score">0</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-name">시장 폭 (코스피 vs 코스닥 상대강도)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:62%"></div></div>
+          <span class="comp-score">62.2</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-name">안전자산 수요 (원/달러 환율)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:54%"></div></div>
+          <span class="comp-score">53.5</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-name">거래심리 (당일 강도)</span>
+          <div class="comp-bar-track"><div class="comp-bar-fill" style="width:64%"></div></div>
+          <span class="comp-score">64.5</span>
+        </div></div>
+      </div>
+      <p class="fg-insight">💡 가격은 상승 모멘텀을 보이지만 V-KOSPI(변동성)가 매우 높은 수준입니다. 상승장 속에서도 불안정성이 큰 &#x27;살얼음판 랠리&#x27; 신호로 해석될 수 있습니다.</p>
+      <p class="fg-source">산출: KOSPI/KOSDAQ 지수, V-KOSPI, 원/달러 환율 기반 자체 계산 (CNN 7지표를 한국에서 구할 수 있는 5개 대체지표로 재구성)</p>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>핵심 시장 지표</h2>
+    <div class="idx-grid">
+      <div class="idx-tile"><div class="idx-name">KOSPI <span style="color:var(--text-muted)">· 2026-08-14</span></div>
+        <div class="idx-val">6,977.94</div><div class="idx-chg" style="color:var(--good)">+2.42%</div></div><div class="idx-tile"><div class="idx-name">KOSDAQ <span style="color:var(--text-muted)">· 조회시점(실시간)</span></div>
+        <div class="idx-val">864.39</div><div class="idx-chg" style="color:var(--critical)">-0.03%</div></div><div class="idx-tile"><div class="idx-name">USD/KRW <span style="color:var(--text-muted)">· 조회시점(실시간)</span></div>
+        <div class="idx-val">1,411.60</div><div class="idx-chg" style="color:var(--critical)">-0.35%</div></div><div class="idx-tile"><div class="idx-name">V-KOSPI <span style="color:var(--text-muted)">· 2026-08-14</span></div>
+        <div class="idx-val">55.31</div><div class="idx-chg" style="color:var(--good)">+0.05</div></div>
+    </div>
+  </section>
+
+  
+    <section class="card">
+      <h2>🇰🇷 국내 종목 매매전략 (코스피/코스닥 스크리닝)</h2>
+      <div class="table-wrap">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>종목</th><th>현재가/등락</th><th>매매 스타일</th><th>스코어(0~100)</th>
+              <th>매수가</th><th>목표가</th><th>손절가</th><th>전략 메모</th>
+            </tr>
+          </thead>
+          <tbody>
+    <tr>
+      <td class="t-name"><strong>SK하이닉스</strong><br><span class="t-ticker">000660.KS</span></td>
+      <td class="t-num">1,762,000<br><span style="color:var(--good)">+0.17%</span></td>
+      <td class="t-style">버핏형 (가치·안전마진)</td>
+      <td class="t-score">버핏 76.7 / 리버모어 31.1</td>
+      <td class="t-num">1,638,660 ~ 1,762,000</td>
+      <td class="t-num">장기보유(목표가 없음)</td>
+      <td class="t-num">가격기준 손절 없음</td>
+      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>삼성전자</strong><br><span class="t-ticker">005930.KS</span></td>
+      <td class="t-num">42,000<br><span style="color:var(--critical)">-0.36%</span></td>
+      <td class="t-style">버핏형 (가치·안전마진)</td>
+      <td class="t-score">버핏 67.2 / 리버모어 52.4</td>
+      <td class="t-num">39,060 ~ 42,000</td>
+      <td class="t-num">장기보유(목표가 없음)</td>
+      <td class="t-num">가격기준 손절 없음</td>
+      <td class="t-note">가격이 아닌 &#x27;해자(경쟁우위)·실적&#x27; 훼손 여부로 매도 판단. 추가 하락 시 분할 매수(에버리징)로 평단 관리.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>NAVER</strong><br><span class="t-ticker">035420.KS</span></td>
+      <td class="t-num">267,000<br><span style="color:var(--critical)">-2.73%</span></td>
+      <td class="t-style">혼합형 (가치+모멘텀)</td>
+      <td class="t-score">버핏 35.6 / 리버모어 63.1</td>
+      <td class="t-num">256,320 ~ 267,000</td>
+      <td class="t-num">299,040</td>
+      <td class="t-num">248,310</td>
+      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>카카오</strong><br><span class="t-ticker">035720.KS</span></td>
+      <td class="t-num">38,300<br><span style="color:var(--good)">+0.39%</span></td>
+      <td class="t-style">혼합형 (가치+모멘텀)</td>
+      <td class="t-score">버핏 50 / 리버모어 26.7</td>
+      <td class="t-num">36,768 ~ 38,300</td>
+      <td class="t-num">42,896</td>
+      <td class="t-num">35,619</td>
+      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+    </tr></tbody>
+        </table>
+      </div>
+    </section>
+  
+    <section class="card">
+      <h2>🇺🇸 미국 종목 매매전략 (대형주 스크리닝)</h2>
+      <div class="table-wrap">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>종목</th><th>현재가/등락</th><th>매매 스타일</th><th>스코어(0~100)</th>
+              <th>매수가</th><th>목표가</th><th>손절가</th><th>전략 메모</th>
+            </tr>
+          </thead>
+          <tbody>
+    <tr>
+      <td class="t-name"><strong>NVIDIA</strong><br><span class="t-ticker">NVDA</span></td>
+      <td class="t-num">225.16<br><span style="color:var(--critical)">-0.06%</span></td>
+      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
+      <td class="t-score">버핏 7.2 / 리버모어 74.1</td>
+      <td class="t-num">218.41 ~ 227.41</td>
+      <td class="t-num">265.69</td>
+      <td class="t-num">207.15</td>
+      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Berkshire Hathaway</strong><br><span class="t-ticker">BRK-B</span></td>
+      <td class="t-num">504.03<br><span style="color:var(--critical)">-0.57%</span></td>
+      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
+      <td class="t-score">버핏 44.1 / 리버모어 71.3</td>
+      <td class="t-num">488.91 ~ 509.07</td>
+      <td class="t-num">594.76</td>
+      <td class="t-num">463.71</td>
+      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Microsoft</strong><br><span class="t-ticker">MSFT</span></td>
+      <td class="t-num">495.40<br><span style="color:var(--critical)">-0.30%</span></td>
+      <td class="t-style">리버모어형 (모멘텀·돌파)</td>
+      <td class="t-score">버핏 20.5 / 리버모어 66.8</td>
+      <td class="t-num">480.54 ~ 500.35</td>
+      <td class="t-num">584.57</td>
+      <td class="t-num">455.77</td>
+      <td class="t-note">52주 고점 부근 돌파 시 거래량 동반 확인 후 분할 매수. 손절 -8% 원칙 엄수(리버모어 손절 규율).</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Apple</strong><br><span class="t-ticker">AAPL</span></td>
+      <td class="t-num">303.88<br><span style="color:var(--critical)">-0.67%</span></td>
+      <td class="t-style">혼합형 (가치+모멘텀)</td>
+      <td class="t-score">버핏 17.7 / 리버모어 64.5</td>
+      <td class="t-num">291.72 ~ 303.88</td>
+      <td class="t-num">340.35</td>
+      <td class="t-num">282.61</td>
+      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+    </tr>
+    <tr>
+      <td class="t-name"><strong>Alphabet</strong><br><span class="t-ticker">GOOGL</span></td>
+      <td class="t-num">343.61<br><span style="color:var(--critical)">-0.66%</span></td>
+      <td class="t-style">혼합형 (가치+모멘텀)</td>
+      <td class="t-score">버핏 49.4 / 리버모어 59.6</td>
+      <td class="t-num">329.87 ~ 343.61</td>
+      <td class="t-num">384.84</td>
+      <td class="t-num">319.56</td>
+      <td class="t-note">가치 지표와 모멘텀 지표가 혼재 -&gt; 분할 매수, 목표가 도달 시 절반 익절 후 나머지는 추세 추종.</td>
+    </tr></tbody>
+        </table>
+      </div>
+    </section>
+  
+    <section class="card">
+      <h2>달리오 스타일 포트폴리오 배분 제안</h2>
+      <p class="card-subtitle">올웨더(All Weather) 포트폴리오를 현재 공포탐욕 국면에 맞춰 리밸런싱한 참고안입니다.</p>
+      <div class="alloc-list"><div class="alloc-item"><div class="alloc-bar" style="width:30.3%"></div><span class="alloc-label">주식(국내+해외)</span><span class="alloc-pct">30.3%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:40.1%"></div><span class="alloc-label">장기채권</span><span class="alloc-pct">40.1%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:15.1%"></div><span class="alloc-label">중기채권</span><span class="alloc-pct">15.1%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:7.4%"></div><span class="alloc-label">금</span><span class="alloc-pct">7.4%</span></div><div class="alloc-item"><div class="alloc-bar" style="width:7.1%"></div><span class="alloc-label">원자재/현금</span><span class="alloc-pct">7.1%</span></div></div>
+      <p class="fg-insight">💡 현재 F&amp;G 48.9점 국면 기준 기본 올웨더(30/40/15/7.5/7.5) 대비 주식 비중을 +0.3%p 틸트했습니다.</p>
+    </section>
+  
+    <section class="card">
+      <h2>이 리포트가 참고하는 투자 철학</h2>
+      <div class="guru-grid"><div class="guru-card"><h3>워런 버핏 (가치투자)</h3><p>좋은 기업을 좋은 가격에 사서 오래 보유합니다. PER·PBR 등으로 &#x27;안전마진&#x27;을 확인하고, 주가가 아니라 기업의 경쟁우위(해자)와 실적이 훼손됐을 때만 매도합니다. &quot;남들이 욕심을 낼 때 두려워하고, 남들이 두려워할 때 욕심을 내라.&quot;</p></div><div class="guru-card"><h3>제시 리버모어 (추세/모멘텀 매매)</h3><p>시장의 &#x27;피벗 포인트(전환점)&#x27;를 포착해 신고가 돌파 시 거래량을 동반한 상승에 올라탑니다. 손실은 짧게(-7~10%), 이익은 길게 끌고 가는 손절 규율을 철저히 지켰습니다. &quot;돈은 생각하는 데서 버는 게 아니라 기다리는 데서 번다.&quot;</p></div><div class="guru-card"><h3>레이 달리오 (매크로/올웨더)</h3><p>경제는 성장·물가의 4가지 국면(레짐)을 순환한다고 보고, 어떤 국면에서도 견디는 자산배분(주식·채권·금·원자재 분산)으로 리스크를 관리합니다. 예측보다 분산을 신뢰합니다.</p></div></div>
+    </section>
+
+  <footer class="disclaimer">
+    <strong>면책 조항</strong> · 이 대시보드는 공개된 시세/지표를 기반으로 규칙 기반 스코어링을 적용한
+    교육·참고용 자료이며, 투자자문업자가 제공하는 개인 맞춤형 투자자문이 아닙니다. 매수가/목표가/손절가는
+    변동성과 리스크 성향에 따라 조정이 필요하며, 과거 대가들의 원칙을 현재 데이터에 규칙으로 근사한 것으로
+    실제 대가 본인의 판단과 다를 수 있습니다. 모든 투자의 최종 책임은 투자자 본인에게 있으며, 원금 손실이
+    발생할 수 있습니다. 데이터는 각 카드에 표기된 시점 기준이며 지연 시세를 포함할 수 있습니다.
+  </footer>
+</div>
+</div>
+</body>
+</html>

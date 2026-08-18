@@ -1,0 +1,35 @@
+{
+  "note": "매일 자동 리포트가 조회하는 기본 감시 리스트(watchlist). 필요에 따라 자유롭게 추가/교체 가능.",
+  "kr": [
+    {"ticker": "005930.KS", "name": "삼성전자"},
+    {"ticker": "000660.KS", "name": "SK하이닉스"},
+    {"ticker": "035420.KS", "name": "NAVER"},
+    {"ticker": "035720.KS", "name": "카카오"},
+    {"ticker": "005380.KS", "name": "현대차"},
+    {"ticker": "051910.KS", "name": "LG화학"},
+    {"ticker": "068270.KS", "name": "셀트리온"},
+    {"ticker": "207940.KS", "name": "삼성바이오로직스"},
+    {"ticker": "006400.KS", "name": "삼성SDI"},
+    {"ticker": "105560.KS", "name": "KB금융"},
+    {"ticker": "055550.KS", "name": "신한지주"},
+    {"ticker": "247540.KQ", "name": "에코프로비엠"},
+    {"ticker": "086520.KQ", "name": "에코프로"},
+    {"ticker": "091990.KQ", "name": "셀트리온헬스케어"}
+  ],
+  "us": [
+    {"ticker": "AAPL", "name": "Apple"},
+    {"ticker": "MSFT", "name": "Microsoft"},
+    {"ticker": "GOOGL", "name": "Alphabet"},
+    {"ticker": "AMZN", "name": "Amazon"},
+    {"ticker": "NVDA", "name": "NVIDIA"},
+    {"ticker": "META", "name": "Meta Platforms"},
+    {"ticker": "BRK-B", "name": "Berkshire Hathaway"},
+    {"ticker": "JPM", "name": "JPMorgan Chase"},
+    {"ticker": "JNJ", "name": "Johnson & Johnson"},
+    {"ticker": "KO", "name": "Coca-Cola"},
+    {"ticker": "PG", "name": "Procter & Gamble"},
+    {"ticker": "XOM", "name": "Exxon Mobil"},
+    {"ticker": "TSLA", "name": "Tesla"},
+    {"ticker": "AVGO", "name": "Broadcom"}
+  ]
+}
