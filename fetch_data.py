@@ -10,6 +10,7 @@ data.json 스키마로 저장한다.
 (requests/yfinance 같은 일반 아웃바운드 네트워크가 막혀 있는 환경에서는 동작하지 않는다).
 """
 import json
+import re
 import sys
 import time
 import traceback
@@ -174,12 +175,67 @@ def fetch_stock(ticker, name):
 
 def fetch_universe(list_, limit=None):
     out = []
-    for item in list_[:limit] if limit else list_:
+    total = len(list_[:limit] if limit else list_)
+    for i, item in enumerate(list_[:limit] if limit else list_, 1):
         s = fetch_stock(item["ticker"], item["name"])
         if s:
             out.append(s)
-        time.sleep(0.3)  # 과도한 연속 호출 방지
+        if i % 20 == 0:
+            log(f"  진행: {i}/{total}")
+        time.sleep(0.2)  # 과도한 연속 호출 방지
     return out
+
+
+# ---------------------------------------------------------------------------
+# 3-1) 거래대금(거래량) 상위 종목 자동 스크리닝
+# ---------------------------------------------------------------------------
+def fetch_kr_top_by_value(sosok, market_label, max_items=50):
+    """네이버금융 '거래대금상위' 페이지에서 종목명/코드를 추출한다.
+    sosok=0: 코스피, sosok=1: 코스닥. 50개/페이지이므로 필요한 만큼 페이지를 넘긴다."""
+    suffix = ".KS" if sosok == 0 else ".KQ"
+    items = []
+    seen = set()
+    page = 1
+    while len(items) < max_items and page <= 4:
+        url = f"https://finance.naver.com/sise/sise_quant.naver?sosok={sosok}&page={page}"
+        r = requests.get(url, headers=HEADERS, timeout=20)
+        r.raise_for_status()
+        r.encoding = "euc-kr"
+        html = r.text
+        found_this_page = 0
+        for m in re.finditer(r'/item/main\.naver\?code=(\d{6})"[^>]*>([^<]+)</a>', html):
+            code, name = m.group(1), m.group(2).strip()
+            if code in seen:
+                continue
+            seen.add(code)
+            items.append({"ticker": f"{code}{suffix}", "name": name})
+            found_this_page += 1
+            if len(items) >= max_items:
+                break
+        if found_this_page == 0:
+            break  # 더 이상 페이지가 없음
+        page += 1
+    log(f"{market_label} 거래대금 상위 {len(items)}종목 수집 완료")
+    return items
+
+
+def fetch_us_top_by_value(count=100):
+    """야후 파이낸스 'most_actives' 스크리너(거래량 상위, 달러 거래대금 상위와 유사)를 사용.
+    엔드포인트/스키마가 바뀌면 예외를 던지고 상위 호출부에서 정적 리스트로 대체한다."""
+    url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved"
+    params = {"formatted": "false", "lang": "en-US", "region": "US", "scrIds": "most_actives", "count": count}
+    r = requests.get(url, headers=HEADERS, params=params, timeout=20)
+    r.raise_for_status()
+    data = r.json()
+    quotes = data["finance"]["result"][0]["quotes"]
+    items = []
+    for q in quotes:
+        sym = q.get("symbol")
+        name = q.get("shortName") or q.get("longName") or sym
+        if sym:
+            items.append({"ticker": sym, "name": name})
+    log(f"미국 거래대금(거래량) 상위 {len(items)}종목 수집 완료")
+    return items
 
 
 # ---------------------------------------------------------------------------
@@ -227,18 +283,42 @@ def main():
         },
     }
 
-    log("종목 유니버스 수집 중...")
     with open("universe.json", encoding="utf-8") as f:
         universe = json.load(f)
 
-    kr_stocks = fetch_universe(universe["kr"])
-    us_stocks = fetch_universe(universe["us"])
+    log("한국 거래대금 상위 종목(코스피50+코스닥50) 자동 수집 중...")
+    kr_dynamic = (
+        safe(lambda: fetch_kr_top_by_value(0, "코스피", 50), default=[], label="kr_top_kospi")
+        + safe(lambda: fetch_kr_top_by_value(1, "코스닥", 50), default=[], label="kr_top_kosdaq")
+    )
+    if len(kr_dynamic) < 20:
+        log("WARN: 거래대금 상위 수집 실패/부족 -> universe.json 고정 리스트로 대체")
+        kr_list, kr_dynamic_ok = universe["kr"], False
+    else:
+        kr_list, kr_dynamic_ok = kr_dynamic, True
+
+    log("미국 거래대금(거래량) 상위 100종목 자동 수집 중...")
+    us_dynamic = safe(lambda: fetch_us_top_by_value(100), default=[], label="us_top_active")
+    if len(us_dynamic) < 20:
+        log("WARN: 미국 상위 종목 수집 실패/부족 -> universe.json 고정 리스트로 대체")
+        us_list, us_dynamic_ok = universe["us"], False
+    else:
+        us_list, us_dynamic_ok = us_dynamic, True
+
+    log(f"종목 상세 데이터 수집 중 (KR {len(kr_list)}종목, US {len(us_list)}종목)...")
+    kr_stocks = fetch_universe(kr_list)
+    us_stocks = fetch_universe(us_list)
+
+    universe_note = (
+        f"한국: {'거래대금 상위 (코스피 50 + 코스닥 50, 네이버금융 실시간 랭킹)' if kr_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'} · "
+        f"미국: {'거래대금(거래량) 상위 100종목 (야후파이낸스 스크리너)' if us_dynamic_ok else '자동 수집 실패로 고정 감시리스트 사용'}"
+    )
 
     data = {
         "generated_at": now.isoformat(),
         "generated_at_label": now.strftime("%Y-%m-%d %H:%M KST"),
         "data_asof_note": "미국 지표는 CNN/야후파이낸스 최신 종가, 한국 지표는 야후파이낸스 최신 데이터 기준입니다. "
-                           "V-KOSPI는 실측치가 아닌 실현변동성 대체 지표입니다.",
+                           "V-KOSPI는 실측치가 아닌 실현변동성 대체 지표입니다. 종목 유니버스: " + universe_note,
         "us_fear_greed": us_fg,
         "indices": indices,
         "kr_stocks": kr_stocks,
