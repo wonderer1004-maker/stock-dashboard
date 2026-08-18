@@ -118,7 +118,7 @@ def render_stock_row(s, style, levels, b_score, l_score):
     </tr>'''
 
 
-def render_stock_table(title, stocks):
+def render_stock_table(title, stocks, top_n=20):
     rows = ""
     scored = []
     for s in stocks:
@@ -131,8 +131,15 @@ def render_stock_table(title, stocks):
         scored.append((s, style, levels, b, l))
 
     scored.sort(key=lambda t: max(t[3], t[4]), reverse=True)
-    for s, style, levels, b, l in scored:
+    total = len(scored)
+    shown = scored[:top_n] if top_n else scored
+    for s, style, levels, b, l in shown:
         rows += render_stock_row(s, style, levels, b, l)
+
+    note = ""
+    if total > len(shown):
+        note = (f'<p class="card-subtitle" style="margin-top:8px">전체 {total}종목을 버핏·리버모어 스코어로 '
+                f'스크리닝한 뒤, 스코어 상위 {len(shown)}종목만 표시합니다.</p>')
 
     return f'''
     <section class="card">
@@ -148,6 +155,7 @@ def render_stock_table(title, stocks):
           <tbody>{rows}</tbody>
         </table>
       </div>
+      {note}
     </section>'''
 
 
